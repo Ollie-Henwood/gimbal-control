@@ -5,8 +5,8 @@
 Servo sg90; //SCL into A5, SDA into A4
 int servo_pin = 9; //Servo connected to D9
 MPU6050 sensor;
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
+int16_t ax, ay, az; //accelerometer - linear acceleration
+int16_t gx, gy, gz; //gyroscope - angular acceleration
 
 void setup(){
 sg90.attach(servo_pin);
