@@ -15,9 +15,9 @@ Serial.begin(9600);
 Serial.println("Initializing the sensor");
 sensor.initialize();
 Serial.println(sensor.testConnection() ? "Successfully Connected":"Connection failed");
-delay(1000);
+delay(200);
 Serial.println("Taking Values from the sensor");
-delay(1000);
+delay(200);
 }
 
 void loop() {
@@ -25,5 +25,5 @@ sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 gy = map(gy, -17000, 17000, 0, 180);
 Serial.println(gy);
 sg90.write(gy);
-delay(2);
+delay(200);
 }
