@@ -25,5 +25,5 @@ sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 gy = map(gy, -17000, 17000, 0, 180);
 Serial.println(gy);
 sg90.write(gy);
-delay(200);
+delay(100);
 }
