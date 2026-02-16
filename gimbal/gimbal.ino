@@ -2,16 +2,18 @@
 #include<MPU6050.h>
 #include<Servo.h>
 
+<<<<<<< HEAD
 Servo sg90; //SCL into A5, SDA into A4
 int servo_pin = 9; //Servo connected to D9
+=======
+>>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
 Servo sg90;
 Servo sg91;
 int servo_pin = 9;
 int servo_pin2 = 10;
 MPU6050 sensor;
-int16_t ax, ay, az; //accelerometer - linear acceleration
-int16_t gx, gy, gz; //gyroscope - angular acceleration
 
+<<<<<<< HEAD
 void setup(){
 sg90.attach(servo_pin);
 Wire.begin();
@@ -23,6 +25,8 @@ delay(200);
 Serial.println("Taking Values from the sensor");
 delay(200);
 
+=======
+>>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
@@ -41,12 +45,15 @@ void setup() {
 }
 
 void loop() {
+<<<<<<< HEAD
 sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 gy = map(gy, -17000, 17000, 0, 180);
 Serial.println(gy);
 sg90.write(gy);
 delay(100);
 }  sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+=======
+>>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Time difference
@@ -72,7 +79,11 @@ delay(100);
   //x = constrain(x, 0, 180);
   //y = constrain(y, 0, 180);
   
+<<<<<<< HEAD
   sg90.write((int)x + 90);
+=======
+  sg90.write((int)x);
+>>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
   sg91.write((int)y);
   Serial.print("Angle-x: "); Serial.print(x);
   Serial.print("   Angle-y: "); Serial.println(y);
