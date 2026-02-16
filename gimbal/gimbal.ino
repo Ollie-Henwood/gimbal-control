@@ -53,8 +53,8 @@ void loop() {
   
   sg90.write((int)angle);
   sg91.write((int)angle2);
-  Serial.print("Angle-y: "); Serial.println(angle);
-  Serial.print("Angle-x: "); Serial.println(angle2);
+  Serial.print("Angle-y: "); Serial.print(angle);
+  Serial.print("   Angle-x: "); Serial.println(angle2);
   delay(10);
 }
 
