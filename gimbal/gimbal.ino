@@ -2,31 +2,12 @@
 #include<MPU6050.h>
 #include<Servo.h>
 
-<<<<<<< HEAD
-Servo sg90; //SCL into A5, SDA into A4
-int servo_pin = 9; //Servo connected to D9
-=======
->>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
 Servo sg90;
 Servo sg91;
 int servo_pin = 9;
 int servo_pin2 = 10;
 MPU6050 sensor;
 
-<<<<<<< HEAD
-void setup(){
-sg90.attach(servo_pin);
-Wire.begin();
-Serial.begin(9600);
-Serial.println("Initializing the sensor");
-sensor.initialize();
-Serial.println(sensor.testConnection() ? "Successfully Connected":"Connection failed");
-delay(200);
-Serial.println("Taking Values from the sensor");
-delay(200);
-
-=======
->>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
@@ -45,15 +26,6 @@ void setup() {
 }
 
 void loop() {
-<<<<<<< HEAD
-sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-gy = map(gy, -17000, 17000, 0, 180);
-Serial.println(gy);
-sg90.write(gy);
-delay(100);
-}  sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-=======
->>>>>>> d08b27ca9f8d45a8dff811bf52a3df0554b5b125
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Time difference
