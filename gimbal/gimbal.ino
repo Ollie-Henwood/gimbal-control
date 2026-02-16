@@ -47,6 +47,7 @@ Serial.println(gy);
 sg90.write(gy);
 delay(100);
 }  sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Time difference
   unsigned long currentTime = millis();
