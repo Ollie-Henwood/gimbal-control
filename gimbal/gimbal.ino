@@ -11,8 +11,8 @@ MPU6050 sensor;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
-float angle = 0.0;
-float angle2 = 0.0;
+float x = 0.0;
+float y = 0.0;
 unsigned long lastTime = 0;
 float alpha = 0.96; // Complementary filter constant
 
@@ -35,26 +35,26 @@ void loop() {
   
   // Gyro contribution (integration)
   float gyroRate = gy / 131.0;
-  float gyroAngle = angle + gyroRate * dt;
+  float gyrox = x + gyroRate * dt;
   float gyroRate2 = gx / 131.0;
-  float gyroAngle2 = angle2 + gyroRate2 * dt;
+  float gyroy = y + gyroRate2 * dt;
   
   // Accelerometer contribution (tilt angle from gravity)
-  float accelAngle = atan2(ay, az) * 180 / PI;
-  float accelAngle2 = atan2(ay, az) * 180 / PI;
+  float accelx = atan2(ax, az) * 180 / PI;
+  float accely = atan2(ay, az) * 180 / PI;
   
   // Complementary filter
-  angle = alpha * gyroAngle + (1.0 - alpha) * accelAngle;
-  angle2 = alpha * gyroAngle2 + (1.0 - alpha) * accelAngle2;
+  x = - alpha * gyrox + (1.0 - alpha) * accelx;
+  y = alpha * gyroy + (1.0 - alpha) * accely;
 
   // Constrain and map if needed
-  angle = constrain(angle, 0, 180);
-  angle2 = constrain(angle2, 0, 180);
+  x = constrain(x, 0, 180);
+  y = constrain(y, 0, 180);
   
-  sg90.write((int)angle);
-  sg91.write((int)angle2);
-  Serial.print("Angle-y: "); Serial.print(angle);
-  Serial.print("   Angle-x: "); Serial.println(angle2);
+  sg90.write((int)x);
+  sg91.write((int)y);
+  Serial.print("Angle-y: "); Serial.print(x);
+  Serial.print("   Angle-x: "); Serial.println(y);
   delay(10);
 }
 
