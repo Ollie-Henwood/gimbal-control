@@ -51,8 +51,8 @@ void loop() {
   //x = constrain(x, 0, 180);
   //y = constrain(y, 0, 180);
   
-  sg90.write((int)x);
-  sg91.write((int)y);
+  sg90.write((int)x+90);
+  sg91.write((int)y+90);
   Serial.print("Angle-x: "); Serial.print(x);
   Serial.print("   Angle-y: "); Serial.println(y);
   delay(10);
