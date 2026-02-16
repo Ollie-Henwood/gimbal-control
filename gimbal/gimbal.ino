@@ -34,27 +34,27 @@ void loop() {
   lastTime = currentTime;
   
   // Gyro contribution (integration)
-  float gyroRate = gy / 131.0;
+  float gyroRate = gx / 131.0;
   float gyrox = x + gyroRate * dt;
-  float gyroRate2 = gx / 131.0;
+  float gyroRate2 = gy / 131.0;
   float gyroy = y + gyroRate2 * dt;
   
   // Accelerometer contribution (tilt angle from gravity)
-  float accelx = atan2(ax, az) * 180 / PI;
-  float accely = atan2(ay, az) * 180 / PI;
+  float accelx = atan2(ay, az) * 180 / PI;
+  float accely = atan2(ax, az) * 180 / PI;
   
   // Complementary filter
-  x = - alpha * gyrox + (1.0 - alpha) * accelx;
-  y = alpha * gyroy + (1.0 - alpha) * accely;
+  x = alpha * gyrox + (1.0 - alpha) * accelx;
+  y = alpha * gyroy - (1.0 - alpha) * accely;
 
   // Constrain and map if needed
-  x = constrain(x, 0, 180);
-  y = constrain(y, 0, 180);
+  //x = constrain(x, 0, 180);
+  //y = constrain(y, 0, 180);
   
   sg90.write((int)x);
   sg91.write((int)y);
-  Serial.print("Angle-y: "); Serial.print(x);
-  Serial.print("   Angle-x: "); Serial.println(y);
+  Serial.print("Angle-x: "); Serial.print(x);
+  Serial.print("   Angle-y: "); Serial.println(y);
   delay(10);
 }
 
