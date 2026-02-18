@@ -58,8 +58,6 @@ void loop() {
   delay(10);
 }
 
-
-
 #include "Kalman.h"
 
 Kalman::Kalman() {
