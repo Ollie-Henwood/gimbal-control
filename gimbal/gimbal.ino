@@ -6,7 +6,7 @@ Servo sg90;
 Servo sg91;
 int servo_pin = 9;
 int servo_pin2 = 10;
-MPU6050 sensor;
+MPU6050 sensor;  //SDA into A4, SCL into A5
 
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
