@@ -11,5 +11,6 @@ void setup() {
 void loop() {
   duration = pulseIn(mode_pin, HIGH);
   Serial.println(duration);
+<<<<<<< Updated upstream
   delay(15); //because PWM frequency is 50 Hz
 }
