@@ -51,8 +51,8 @@ void loop() {
   //x = constrain(x, 0, 180);
   //y = constrain(y, 0, 180);
   
-  sg90.write((int)x+90);
-  sg91.write((int)y+90);
+  sg90.write((-1*x)+90); //servos must do opposite to actual coordinates
+  sg91.write((-1*y)+90);
   Serial.print("Angle-x: "); Serial.print(x);
   Serial.print("   Angle-y: "); Serial.println(y);
   delay(10);
