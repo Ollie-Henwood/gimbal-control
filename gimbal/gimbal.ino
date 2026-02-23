@@ -14,6 +14,9 @@ int16_t gx, gy, gz;
 float x = 0.0;
 float y = 0.0;
 unsigned long lastTime = 0;
+float Kp;
+float Ki;
+float Kd;
 float alpha = 0.96; // Complementary filter constant
 
 void setup() {
