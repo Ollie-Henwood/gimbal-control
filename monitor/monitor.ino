@@ -11,5 +11,5 @@ void setup() {
 void loop() {
   duration = pulseIn(pin, HIGH);
   Serial.println(duration);
-  delay(100);
+  delay(15);
 }
