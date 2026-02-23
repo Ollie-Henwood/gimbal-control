@@ -1,6 +1,6 @@
 /*Flight mode switcher*/
 
-int pin = D1;
+int pin = D2;
 unsigned long duration;
 
 void setup() {
