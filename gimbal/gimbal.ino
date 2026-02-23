@@ -57,5 +57,3 @@ void loop() {
   Serial.print("   Angle-y: "); Serial.println(y);
   delay(10);
 }
-
-
