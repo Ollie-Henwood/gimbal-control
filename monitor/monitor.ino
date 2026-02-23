@@ -1,15 +1,15 @@
 /*Flight mode switcher*/
 
-int pin = D2;
+int mode_pin = 2; //connected to AUX1 on RX
 unsigned long duration;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(pin, INPUT);
+  pinMode(mode_pin, INPUT);
 }
 
 void loop() {
-  duration = pulseIn(pin, HIGH);
+  duration = pulseIn(mode_pin, HIGH);
   Serial.println(duration);
-  delay(15);
+  delay(15); //because PWM frequency is 50 Hz
 }
