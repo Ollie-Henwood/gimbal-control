@@ -20,7 +20,7 @@ void loop() {
 }
 
 void mode() {
-  if (digitalRead(mode_pin) == 0) {
+  if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
     pulse_width_M = micros() - pulse_start;
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       Serial.println("HIGH");
@@ -36,7 +36,7 @@ void mode() {
 
 }
 void arm() {
-  if (digitalRead(arm_pin) == 0) {
+  if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
     pulse_width_A = micros() - pulse_start;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
       Serial.println("HIGH");
