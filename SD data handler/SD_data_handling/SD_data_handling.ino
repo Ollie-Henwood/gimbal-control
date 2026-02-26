@@ -10,6 +10,11 @@ DO/MISO: Pin 12
 DI/MOSI: Pin 11
 CS: Pin 10 (or any digital pin)*/
 
+/*Things to add:
+  File folder that stores all previous flights
+  Folder that just stores current flight data
+  Assign each byte to data*/
+
 const byte CS_pin = 10;
 
 const char* filename = "test1.bin"; //change to read all files, then name this file +1 greater than previous
