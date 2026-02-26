@@ -26,6 +26,7 @@ void setup() {
 }
 
 void loop() {
+  while (pulse_width = )
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Time difference
