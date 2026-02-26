@@ -8,11 +8,11 @@ File32 file;
 CLK/SCK: Pin 13
 DO/MISO: Pin 12
 DI/MOSI: Pin 11
-CS: Pin 9 (or any digital pin)*/
+CS: Pin 10 (or any digital pin)*/
 
 const byte CS_pin = 10;
 
-const int filename = 'test1.bin'; //change to read all files, then name this file +1 greater than previous
+const char* filename = "test1.bin"; //change to read all files, then name this file +1 greater than previous
 
 byte databuffer[512]; //Fill this before writing to SD
 byte packet[28]; //data packet to be filled with data to be logged
@@ -44,7 +44,7 @@ void setup() {
   Serial.println("SD card initialized.");
 
     // Open the file for writing
-  if (file.open(filename, O_WRITE | O_CREAT | O_TRUNC)) {
+  if (file.open(filename, O_WRITE)) {
     Serial.println("Writing to file");
 
     if (file.write(databuffer, 512) != 512) { //write block to SD
