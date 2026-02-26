@@ -34,7 +34,7 @@ void setup() {
     }
   }
 
-  for (byte i = 504; i>512; i++) {
+  for (uint16_t i = 504; i>512; i++) { //write padding at end of databuffer to make up to 512 bytes
     databuffer[i] = 0;
   }
 
@@ -49,7 +49,7 @@ void setup() {
   Serial.println("SD card initialized.");
 
     // Open the file for writing
-  if (file.open(filename, O_WRITE)) {
+  if (file.open(filename, O_CREAT | O_WRITE)) {
     Serial.println("Writing to file");
 
     if (file.write(databuffer, 512) != 512) { //write block to SD
