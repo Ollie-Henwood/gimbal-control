@@ -39,10 +39,10 @@ void arm() {
   if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
     pulse_width_A = micros() - pulse_start;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
-      Serial.println("HIGH");
+      Serial.println("        HIGH");
     }
     else if (pulse_width_A < 1400 & pulse_width_A > 900) {
-      Serial.println("LOW");
+      Serial.println("        LOW");
     }
   }
 
