@@ -23,3 +23,4 @@ void rise() {
 void fall() {
   pulse_width = micros() - flight_time;
 }
+
