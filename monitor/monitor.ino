@@ -12,7 +12,7 @@ void setup() {
 
 void loop() {
   /*Using the interruption method*/
-  pinMode(mode_pin, INPUT_PULLUP);
+  pinMode(mode_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(mode_pin), rise, RISING);
   attachInterrupt(digitalPinToInterrupt(mode_pin), fall, FALLING); //Usable pins for interrupts are 2 and 3
 }
