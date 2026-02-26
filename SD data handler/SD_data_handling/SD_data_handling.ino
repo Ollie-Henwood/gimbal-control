@@ -12,7 +12,7 @@ CS: Pin 9 (or any digital pin)*/
 
 const byte CS_pin = 10;
 
-const char* filename = 'test1.bin'; //change to read all files, then name this file +1 greater than previous
+const int filename = 'test1.bin'; //change to read all files, then name this file +1 greater than previous
 
 byte databuffer[512]; //Fill this before writing to SD
 byte packet[28]; //data packet to be filled with data to be logged
