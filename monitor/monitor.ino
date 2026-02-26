@@ -17,7 +17,7 @@ void loop() {
 }
 
 void change() {
-  if (digitalRead(mode_pin) == 0) {
+  if (digitalRead(mode_pin) == 0) { //means pulse changed high->low
     pulse_width = micros() - flight_time;
     if (pulse_width < 2100 & pulse_width > 1600) {
       Serial.println("HIGH");
