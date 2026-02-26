@@ -1,14 +1,17 @@
 /*Flight mode switcher*/
 
 int mode_pin = 2; //connected to AUX1 on RX
-unsigned long flight_time;
+int arm_pin = 3; //connected to 
+unsigned long pulse_start;
 volatile byte state = LOW;
-uint16_t pulse_width;
+int16_t pulse_width_M;
+int16_t pulse_width_A;
 
 void setup() {
   Serial.begin(9600);
   pinMode(mode_pin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(mode_pin), change, CHANGE); //Usable pins for interrupts are 2 and 3
+  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(mode_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
 }
 
 void loop() {
@@ -16,18 +19,34 @@ void loop() {
   
 }
 
-void change() {
+void mode() {
   if (digitalRead(mode_pin) == 0) {
-    pulse_width = micros() - flight_time;
-    if (pulse_width < 2100 & pulse_width > 1600) {
+    pulse_width_M = micros() - pulse_start;
+    if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       Serial.println("HIGH");
     }
-    else if (pulse_width < 1400 & pulse_width > 900) {
+    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
       Serial.println("LOW");
     }
   }
 
   else {
-    flight_time = micros();
+    pulse_start = micros();
+  }
+
+}
+void arm() {
+  if (digitalRead(arm_pin) == 0) {
+    pulse_width_A = micros() - pulse_start;
+    if (pulse_width_A < 2100 & pulse_width_A > 1600) {
+      Serial.println("HIGH");
+    }
+    else if (pulse_width_A < 1400 & pulse_width_A > 900) {
+      Serial.println("LOW");
+    }
+  }
+
+  else {
+    pulse_start = micros();
   }
 }
