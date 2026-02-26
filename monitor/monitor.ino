@@ -3,6 +3,7 @@
 int mode_pin = 2; //connected to AUX1 on RX
 unsigned long flight_time;
 volatile byte state = LOW;
+int pulse_width;
 
 void setup() {
   Serial.begin(9600);
