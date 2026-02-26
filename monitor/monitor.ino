@@ -1,7 +1,7 @@
 /*Flight mode switcher*/
 
 int mode_pin = 2; //connected to AUX1 on RX
-unsigned long duration;
+unsigned long flight_time;
 volatile byte state = LOW;
 
 void setup() {
