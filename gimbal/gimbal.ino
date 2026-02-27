@@ -18,13 +18,13 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kp = 0.15;
+float Kp = 0.1;
 float Ki = 0.01;
-float Kd = 0.01;
+float Kd = 0.001;
 float alpha = 0.96; // Complementary filter constant
 
-float setpoint_x = 0;
-float setpoint_y = 0;
+float setpoint_x;
+float setpoint_y;
 
 float error_x[2]; //[0] for last iteration, [1] for current iteration
 float error_y[2];
@@ -47,6 +47,9 @@ void setup() {
   error_y[0] = 0;
   offset_x = 90;
   offset_y = 90;
+
+setpoint_x = 0;
+setpoint_y = 0;
 }
 
 void loop() {
@@ -82,7 +85,7 @@ void loop() {
   Dx = (error_x[1] - error_x[0]) / dt * Kd; //derivative terms
   Dy = (error_y[1] - error_y[0]) / dt * Kd;
 
-  offset_x -= Px + Ix + Dx; //calculated PID error + 90 degree offset (keep servos in working range of 0->180 deg)
+  offset_x -= Px + Ix + Dx; //calculated PID error
   offset_y -= Py + Iy + Dy;
 
   offset_x = constrain(offset_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
@@ -90,8 +93,9 @@ void loop() {
   
   sg90.write(offset_x);
   sg91.write(offset_y);
-  Serial.print(">Error:"); Serial.print(error_x[1]); Serial.print(","); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
-  Serial.print("Offset:"); Serial.print(offset_x); Serial.println("\r\n");
+  Serial.print(">Setpoint:"); Serial.print(setpoint_x);
+  Serial.print(",Error:"); Serial.print(error_x[1]); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
+  Serial.print(",Offset:"); Serial.print(offset_x); Serial.println("\r\n");
   
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
