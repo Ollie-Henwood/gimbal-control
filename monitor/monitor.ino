@@ -89,7 +89,6 @@ void setup() {
   Serial.begin(9600);
   while (!Serial) {} // Wait for serial
 
-  pinMode(mode_pin, INPUT);
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
 
