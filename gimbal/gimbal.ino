@@ -103,7 +103,7 @@ void loop() {
     temp_x += rc_input_x[i];
     temp_y += rc_input_y[i];
   }
-  setpoint_x = temp_x/100;
+  setpoint_x = round(temp_x/1000)*10; //truncate to nearest 10 degrees
   setpoint_y = temp_y/100; //modify setpoint to be equal to RC channel
 
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -147,6 +147,7 @@ void loop() {
   sg90.write(offset_x);
   //sg91.write(offset_y);
   Serial.print(">Setpoint:"); Serial.print(setpoint_x);
+  Serial.print(",Gyro:"); Serial.print(x);
   Serial.print(",Error:"); Serial.print(error_x[1]); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Offset:"); Serial.print(offset_x); Serial.println("\r\n");
   
