@@ -63,7 +63,7 @@ void setup() {
   sg90.attach(servo_pin);
   sg91.attach(servo_pin2);
   Wire.begin();
-  Serial.begin(9600);
+  Serial.begin(115200);
   sensor.initialize();
   lastTime = micros();
 
@@ -131,5 +131,5 @@ void loop() {
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delay(10);
+  delay(1);
 }
