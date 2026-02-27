@@ -19,8 +19,8 @@ float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
 float Kp = 0.008;
-float Ki = 0.001;
-float Kd = 0.001;
+float Ki = 0.0;
+float Kd = 0.0;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
@@ -146,16 +146,17 @@ void loop() {
   
   sg90.write(offset_x);
   //sg91.write(offset_y);
-  Serial.print(">Setpoint:"); Serial.print(float(pulse_width_x - 1500)/500*90);
+  Serial.print(">Setpoint:"); Serial.print(setpoint_x);
   Serial.print(",Error:"); Serial.print(error_x[1]); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Offset:"); Serial.print(offset_x); Serial.println("\r\n");
   
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
+
   for (byte i = 99; i >=1 ; i--) { //shifting arrays
     rc_input_x[i] = rc_input_x[i-1];
     rc_input_y[i] = rc_input_y[i-1];
   }
-  delay(1);
+  delay(10);
 }
