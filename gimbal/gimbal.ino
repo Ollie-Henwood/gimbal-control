@@ -74,7 +74,7 @@ void setup() {
   sg90.attach(servo_pin);
   sg91.attach(servo_pin2);
   Wire.begin();
-  Serial.begin(115200);
+  Serial.begin(9600);
   sensor.initialize();
   lastTime = micros();
 
@@ -150,6 +150,7 @@ void loop() {
   Serial.print(",Gyro:"); Serial.print(x);
   Serial.print(",Error:"); Serial.print(error_x[1]); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Offset:"); Serial.print(offset_x); Serial.println("\r\n");
+  
   
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
