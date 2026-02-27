@@ -35,6 +35,30 @@ float Dx, Dy;
 
 float offset_x, offset_y;
 
+int16_t pulse_width_M;
+int mode_pin = 2;
+unsigned long pulse_start;
+bool Mode;
+
+void mode() {
+  if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
+    pulse_width_M = micros() - pulse_start;
+    if (pulse_width_M < 2100 & pulse_width_M > 1600) {
+      //Serial.println("HIGH");
+      setpoint_x = -45;
+      setpoint_y = -45;
+    }
+    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
+      //Serial.println("LOW");
+      setpoint_x = 0;
+      setpoint_y = 0;
+    }
+  }
+  else {
+    pulse_start = micros();
+  }
+}
+
 void setup() {
   sg90.attach(servo_pin);
   sg91.attach(servo_pin2);
@@ -50,6 +74,9 @@ void setup() {
 
 setpoint_x = 0;
 setpoint_y = 0;
+
+pulse_start = 0;
+attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
 }
 
 void loop() {
