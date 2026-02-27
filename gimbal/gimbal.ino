@@ -35,6 +35,36 @@ float Dx, Dy;
 
 float offset_x, offset_y;
 
+int pin_elevator = 2; //connected to ELE on RX
+int pin_aileron = 3; //connected to AIL on RX
+unsigned long pulse_start_x, pulse_start_y;
+volatile byte state = LOW;
+int16_t pulse_width_x;
+int16_t pulse_width_y;
+
+float rc_input_x, rc_input_y;
+
+void do_x() {
+  if (digitalRead(pin_elevator) == 0) {//means pulse changed high->low
+    pulse_width_x = micros() - pulse_start_x;
+
+    rc_input_x = (pulse_width_x - 1500)/500*90; //mapping the 1000-2000us pulse width to -90-90 degrees
+  }
+  else {
+    pulse_start_x = micros();
+  }
+}
+void do_y() {
+  if (digitalRead(pin_aileron) == 0) {//means pulse changed high->low
+    pulse_width_y = micros() - pulse_start_y;
+
+    rc_input_y = (pulse_width_y - 1500)/500*90; //mapping the 1000-2000us pulse width to -90-90 degrees
+  }
+  else {
+    pulse_start_y = micros();
+  }
+}
+
 void setup() {
   sg90.attach(servo_pin);
   sg91.attach(servo_pin2);
