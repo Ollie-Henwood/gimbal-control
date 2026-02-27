@@ -18,7 +18,7 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kp = 0.08;
+float Kp = 0.008;
 float Ki = 0.001;
 float Kd = 0.001;
 float alpha = 0.96; // Complementary filter constant
@@ -103,8 +103,8 @@ void loop() {
     temp_x += rc_input_x[i];
     temp_y += rc_input_y[i];
   }
-  setpoint_x = temp_x/4;
-  setpoint_y = temp_y/4; //modify setpoint to be equal to RC channel
+  setpoint_x = temp_x/100;
+  setpoint_y = temp_y/100; //modify setpoint to be equal to RC channel
 
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
@@ -144,7 +144,7 @@ void loop() {
   //offset_x = constrain(offset_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
   offset_y = constrain(offset_y, 0, 180);
   
-  //sg90.write(offset_x);
+  sg90.write(offset_x);
   //sg91.write(offset_y);
   Serial.print(">Setpoint:"); Serial.print(float(pulse_width_x - 1500)/500*90);
   Serial.print(",Error:"); Serial.print(error_x[1]); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
