@@ -18,9 +18,9 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kp = 0.1;
-float Ki = 0.01;
-float Kd = 0.001;
+float Kp = 0.03;
+float Ki = 0.0;
+float Kd = 0.0;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
