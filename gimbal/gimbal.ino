@@ -122,10 +122,10 @@ void loop() {
   sg91.write(offset_y);
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1]); 
-  Serial.print(",Offset_x:"); Serial.print(offset_x);
+  Serial.print(",Gyro_x:"); Serial.print(x);
   Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
   Serial.print(",Error_y:"); Serial.print(error_y[1]); 
-  Serial.print(",Offset_y:"); Serial.print(offset_y);
+  Serial.print(",Gyro_y:"); Serial.print(y);
   Serial.println("\r\n");
   
   lastTime = currentTime; //setup for next iteration
