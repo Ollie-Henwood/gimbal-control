@@ -2,10 +2,10 @@
 #include<MPU6050.h>
 #include<Servo.h>
 
-Servo sg90;
-Servo sg91;
-int servo_pin = 5;
-int servo_pin2 = 6;
+Servo servo_x;
+Servo servo_y;
+int servo_pin_x = 5;
+int servo_pin_y = 6;
 MPU6050 sensor;  //SDA into A4, SCL into A5
 
 int16_t ax, ay, az;
@@ -60,8 +60,8 @@ void mode() {
 }
 
 void setup() {
-  sg90.attach(servo_pin);
-  sg91.attach(servo_pin2);
+  servo_x.attach(servo_pin_x);
+  servo_y.attach(servo_pin_y);
   Wire.begin();
   Serial.begin(115200);
   sensor.initialize();
@@ -118,8 +118,8 @@ void loop() {
   offset_x = constrain(offset_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
   offset_y = constrain(offset_y, 0, 180);
   
-  sg90.write(offset_x);
-  sg91.write(offset_y);
+  servo_x.write(offset_x);
+  servo_y.write(offset_y);
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1]); 
   Serial.print(",Gyro_x:"); Serial.print(x);
