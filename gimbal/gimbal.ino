@@ -18,9 +18,9 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kp = 0.03;
-float Ki = 0.0;
-float Kd = 0.0;
+float Kp = 0.1;
+float Ki = 0.04;
+float Kd = 0.0001;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
@@ -123,7 +123,7 @@ void loop() {
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
 
-  if (Mode == 1) {
+  if (Mode == 1) { // if in stabilising mode
     Px = error_x[1] * Kp; //proportional terms
     Py = error_y[1] * Kp;
 
@@ -139,7 +139,7 @@ void loop() {
     commanded_x = constrain(commanded_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
     commanded_y = constrain(commanded_y, 0, 180);
   }
-  else {
+  else { // if in locked mode
     commanded_x = offset_x; commanded_y = offset_x;
   }
   servo_x.write(commanded_x);
@@ -155,5 +155,5 @@ void loop() {
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delay(1);
+  delay(10);
 }
