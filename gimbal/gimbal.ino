@@ -33,29 +33,47 @@ float Px, Py; //PID terms for x and y axes
 float Ix, Iy;
 float Dx, Dy;
 
+float commanded_x, commanded_y;
 float offset_x, offset_y;
 
-int16_t pulse_width_M;
-int mode_pin = 2;
-unsigned long pulse_start;
+int16_t pulse_width_M; int16_t pulse_width_A;
+int mode_pin = 2; int arm_pin = 3;
+unsigned long pulse_start_M; unsigned long pulse_start_A;
 bool Mode;
 
 void mode() {
-  if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
-    pulse_width_M = micros() - pulse_start;
+  if (digitalRead(mode_pin) == 0) {// Mode switch changes mode
+    pulse_width_M = micros() - pulse_start_M;
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
+      //Serial.println("HIGH");
+      Mode = 1;
+    }
+    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
+      //Serial.println("LOW");
+      Mode = 0;
+    }
+  }
+  else {
+    pulse_start_M = micros();
+  }
+}
+
+void arm() {
+  if (digitalRead(arm_pin) == 0) {// Arm switch changes setpoint
+    pulse_width_A = micros() - pulse_start_A;
+    if (pulse_width_A < 2100 & pulse_width_A > 1600) {
       //Serial.println("HIGH");
       setpoint_x = -45;
       setpoint_y = -45;
     }
-    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
+    else if (pulse_width_A < 1400 & pulse_width_A > 900) {
       //Serial.println("LOW");
       setpoint_x = 0;
       setpoint_y = 0;
     }
   }
   else {
-    pulse_start = micros();
+    pulse_start_A = micros();
   }
 }
 
@@ -69,14 +87,16 @@ void setup() {
 
   error_x[0] = 0; //initial set of values
   error_y[0] = 0;
-  offset_x = 90;
-  offset_y = 90;
+  commanded_x = 90;
+  commanded_y = 90;
+  offset_x = 0; offset_y = 0;
 
 setpoint_x = 0;
 setpoint_y = 0;
 
-pulse_start = 0;
+pulse_start_M = 0; pulse_start_A = 0;
 attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 }
 
 void loop() {
@@ -103,23 +123,27 @@ void loop() {
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
 
-  Px = error_x[1] * Kp; //proportional terms
-  Py = error_y[1] * Kp;
+  if (Mode == 1) {
+    Px = error_x[1] * Kp; //proportional terms
+    Py = error_y[1] * Kp;
 
-  Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Ki; //integral terms
-  Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Ki;
+    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Ki; //integral terms
+    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Ki;
 
-  Dx = (error_x[1] - error_x[0]) / dt * Kd; //derivative terms
-  Dy = (error_y[1] - error_y[0]) / dt * Kd;
+    Dx = (error_x[1] - error_x[0]) / dt * Kd; //derivative terms
+    Dy = (error_y[1] - error_y[0]) / dt * Kd;
 
-  offset_x -= Px + Ix + Dx; //calculated PID error
-  offset_y -= Py + Iy + Dy;
+    commanded_x -= Px + Ix + Dx; //calculated PID error
+    commanded_y -= Py + Iy + Dy;
 
-  offset_x = constrain(offset_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
-  offset_y = constrain(offset_y, 0, 180);
-  
-  servo_x.write(offset_x);
-  servo_y.write(offset_y);
+    commanded_x = constrain(commanded_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
+    commanded_y = constrain(commanded_y, 0, 180);
+  }
+  else {
+    commanded_x = offset_x; commanded_y = offset_x;
+  }
+  servo_x.write(commanded_x);
+  servo_y.write(commanded_y);
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1]); 
   Serial.print(",Gyro_x:"); Serial.print(x);
