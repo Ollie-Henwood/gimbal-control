@@ -89,7 +89,7 @@ void setup() {
   error_y[0] = 0;
   commanded_x = 90;
   commanded_y = 90;
-  offset_x = 90; offset_y = 90; //Servo angles for straight and level (locked mode)
+  offset_x = 86.5; offset_y = 83.6; //Servo angles for straight and level (locked mode)
 
 setpoint_x = 0;
 setpoint_y = 0;
@@ -146,10 +146,10 @@ void loop() {
   servo_y.write(commanded_y);
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1]); 
-  Serial.print(",Gyro_x:"); Serial.print(commanded_x);
+  Serial.print(",Gyro_x:"); Serial.print(x);
   Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
   Serial.print(",Error_y:"); Serial.print(error_y[1]); 
-  Serial.print(",Gyro_y:"); Serial.print(commanded_y);
+  Serial.print(",Gyro_y:"); Serial.print(y);
   Serial.println("\r\n");
   
   lastTime = currentTime; //setup for next iteration
