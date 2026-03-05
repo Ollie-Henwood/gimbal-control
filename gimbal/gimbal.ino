@@ -18,9 +18,12 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kp = 0.1;
-float Ki = 0.04;
-float Kd = 0.0001;
+float Kpx = 0.1; //x axis coefficients
+float Kix = 0.0;
+float Kdx = 0.0;
+float Kpy = 0.1; //y axis coefficients
+float Kiy = 0.0;
+float Kdy = 0.0;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
@@ -124,14 +127,14 @@ void loop() {
   error_y[1] = setpoint_y - y;
 
   if (Mode == 1) { // if in stabilising mode
-    Px = error_x[1] * Kp; //proportional terms
-    Py = error_y[1] * Kp;
+    Px = error_x[1] * Kpx; //proportional terms
+    Py = error_y[1] * Kpy;
 
-    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Ki; //integral terms
-    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Ki;
+    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
+    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
 
-    Dx = (error_x[1] - error_x[0]) / dt * Kd; //derivative terms
-    Dy = (error_y[1] - error_y[0]) / dt * Kd;
+    Dx = (error_x[1] - error_x[0]) / dt * Kdx; //derivative terms
+    Dy = (error_y[1] - error_y[0]) / dt * Kdy;
 
     commanded_x -= Px + Ix + Dx; //calculated PID error
     commanded_y -= Py + Iy + Dy;
