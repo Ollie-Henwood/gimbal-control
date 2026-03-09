@@ -94,12 +94,14 @@ void setup() {
   commanded_y = 90;
   offset_x = 86.5; offset_y = 83.6; //Servo angles for straight and level (locked mode)
 
-setpoint_x = 0;
-setpoint_y = 0;
+  setpoint_x = 0;
+  setpoint_y = 0;
 
-pulse_start_M = 0; pulse_start_A = 0;
-attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
+  pulse_start_M = 0; pulse_start_A = 0;
+  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
+
+  Mode = 1;
 }
 
 void loop() {
