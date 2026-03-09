@@ -11,7 +11,7 @@ MPU6050 sensor;  //SDA into A4, SCL into A5
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
-float microsecond = 1000000.0;
+float second = 1000000.0; // one second in us
 float dt;
 unsigned long currentTime;
 
@@ -109,7 +109,7 @@ void loop() {
   
   // Time difference
   currentTime = micros();
-  dt = float(currentTime - lastTime) / microsecond;
+  dt = float(currentTime - lastTime) / second;
   
   // Gyro contribution (integration)
   float gyroRate = gx / 131.0;
