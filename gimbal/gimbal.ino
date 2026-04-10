@@ -145,7 +145,7 @@ void loop() {
     commanded_y = constrain(commanded_y, 0, 180);
   }
   else { // if in locked mode
-    commanded_x = offset_x; commanded_y = offset_x;
+    commanded_x = offset_x; commanded_y = offset_y;
   }
   servo_x.write(commanded_x);
   servo_y.write(commanded_y);
