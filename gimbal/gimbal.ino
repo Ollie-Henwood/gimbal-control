@@ -18,10 +18,10 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kpx = 0.1; //x axis coefficients
-float Kix = 0.0;
-float Kdx = 0.0;
-float Kpy = 0.1; //y axis coefficients
+float Kpx = 0.03; //x axis coefficients
+float Kix = 1;
+float Kdx = 0.0001;
+float Kpy = 0.0; //y axis coefficients
 float Kiy = 0.0;
 float Kdy = 0.0;
 float alpha = 0.96; // Complementary filter constant
@@ -138,8 +138,8 @@ void loop() {
     Dx = (error_x[1] - error_x[0]) / dt * Kdx; //derivative terms
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
 
-    commanded_x -= Px + Ix + Dx; //calculated PID error
-    commanded_y -= Py + Iy + Dy;
+    commanded_x -= (Px + Ix + Dx); //calculated PID error
+    commanded_y -= (Py + Iy + Dy);
 
     commanded_x = constrain(commanded_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
     commanded_y = constrain(commanded_y, 0, 180);
@@ -149,16 +149,19 @@ void loop() {
   }
   servo_x.write(commanded_x);
   servo_y.write(commanded_y);
-  Serial.print(">Setpoint_x:"); Serial.print(setpoint_x); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
-  Serial.print(",Error_x:"); Serial.print(error_x[1]); 
-  Serial.print(",Gyro_x:"); Serial.print(x);
-  Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
-  Serial.print(",Error_y:"); Serial.print(error_y[1]); 
-  Serial.print(",Gyro_y:"); Serial.print(y);
+  Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
+  Serial.print(",Error_x:"); Serial.print(error_x[1],4); 
+  Serial.print(",Gyro_x:"); Serial.print(x,4);
+  Serial.print(",P_x:"); Serial.print(Px,6);
+  Serial.print(",I_x:"); Serial.print(Ix,6);
+  Serial.print(",D_x:"); Serial.print(Dx,6);
+  //Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
+  //Serial.print(",Error_y:"); Serial.print(error_y[1]); 
+  //Serial.print(",Gyro_y:"); Serial.print(y);
   Serial.println("\r\n");
   
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delay(10);
+  delay(0);
 }
