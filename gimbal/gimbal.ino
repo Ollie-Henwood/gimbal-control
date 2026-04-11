@@ -19,10 +19,10 @@ float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
 float Kpx = 0.03; //x axis coefficients
-float Kix = 0.003;
+float Kix = 0.006;
 float Kdx = 0.000;
 float Kpy = 0.03; //y axis coefficients
-float Kiy = 0.003;
+float Kiy = 0.006;
 float Kdy = 0.0;
 float alpha = 0.96; // Complementary filter constant
 
