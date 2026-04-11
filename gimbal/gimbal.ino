@@ -44,6 +44,10 @@ int mode_pin = 2; int arm_pin = 3;
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 bool Mode; //1 = Stabilised; 0 = Locked
 
+float accelx_filtered = 0; //low pass filter
+float accely_filtered = 0;
+float accel_alpha = 0.1; // low-pass weight — tune this (smaller = smoother)
+
 void mode() {
   if (digitalRead(mode_pin) == 0) {// Mode switch changes mode
     pulse_width_M = micros() - pulse_start_M;
@@ -121,9 +125,12 @@ void loop() {
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
   
-  // Complementary filter
-  x = alpha * gyrox + (1.0 - alpha) * accelx; //calculated angle x
-  y = alpha * gyroy - (1.0 - alpha) * accely; //calculated angle y
+  // Low-pass filter
+  accelx_filtered = accel_alpha * accelx + (1.0 - accel_alpha) * accelx_filtered;
+  accely_filtered = accel_alpha * accely + (1.0 - accel_alpha) * accely_filtered;
+
+  x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
+  y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
 
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
