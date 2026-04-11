@@ -54,6 +54,7 @@ void mode() {
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       //Serial.println("HIGH");
       Mode = 1;
+      Ix = 0; Iy = 0;  // reset integral on mode switch
     }
     else if (pulse_width_M < 1400 && pulse_width_M > 900) {
       //Serial.println("LOW");
@@ -82,6 +83,11 @@ void arm() {
   else {
     pulse_start_A = micros();
   }
+}
+
+int degToUs(float deg) {
+  // Maps 0-180 degrees to 544-2400 microseconds (Arduino servo library standard)
+  return (int)(544 + (deg / 180.0) * (2400 - 544));
 }
 
 void setup() {
@@ -157,8 +163,8 @@ void loop() {
   else { // if in locked mode
     commanded_x = offset_x; commanded_y = offset_y;
   }
-  servo_x.write(commanded_x);
-  servo_y.write(commanded_y);
+  servo_x.writeMicroseconds(degToUs(commanded_x));
+  servo_y.writeMicroseconds(degToUs(commanded_y));
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1],4); 
   Serial.print(",Gyro_x:"); Serial.print(x,4);
