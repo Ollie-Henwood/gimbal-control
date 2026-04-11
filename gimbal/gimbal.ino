@@ -19,10 +19,10 @@ float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
 float Kpx = 0.03; //x axis coefficients
-float Kix = 0;
+float Kix = 0.003;
 float Kdx = 0.000;
 float Kpy = 0.03; //y axis coefficients
-float Kiy = 0.0;
+float Kiy = 0.003;
 float Kdy = 0.0;
 float alpha = 0.96; // Complementary filter constant
 
@@ -132,8 +132,11 @@ void loop() {
     Px = error_x[1] * Kpx; //proportional terms
     Py = error_y[1] * Kpy;
 
-    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
-    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
+    Iy += 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+
+    Ix = constrain(Ix, -30, 30); //prevent integral windup if gimbal is bocked
+    Iy = constrain(Iy, -30, 30);
 
     Dx = (error_x[1] - error_x[0]) / dt * Kdx; //derivative terms
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
