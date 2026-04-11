@@ -51,7 +51,7 @@ void mode() {
       //Serial.println("HIGH");
       Mode = 1;
     }
-    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
+    else if (pulse_width_M < 1400 && pulse_width_M > 900) {
       //Serial.println("LOW");
       Mode = 0;
     }
@@ -69,7 +69,7 @@ void arm() {
       setpoint_x = -45;
       setpoint_y = -45;
     }
-    else if (pulse_width_A < 1400 & pulse_width_A > 900) {
+    else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       //Serial.println("LOW");
       setpoint_x = 0;
       setpoint_y = 0;
@@ -98,8 +98,8 @@ void setup() {
   setpoint_y = 0;
 
   pulse_start_M = 0; pulse_start_A = 0;
-  //attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-  //attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
   Mode = 1;
 }
