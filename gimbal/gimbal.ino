@@ -19,9 +19,9 @@ float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
 float Kpx = 0.03; //x axis coefficients
-float Kix = 1;
-float Kdx = 0.0001;
-float Kpy = 0.0; //y axis coefficients
+float Kix = 0;
+float Kdx = 0.000;
+float Kpy = 0.03; //y axis coefficients
 float Kiy = 0.0;
 float Kdy = 0.0;
 float alpha = 0.96; // Complementary filter constant
@@ -98,8 +98,8 @@ void setup() {
   setpoint_y = 0;
 
   pulse_start_M = 0; pulse_start_A = 0;
-  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
   Mode = 1;
 }
