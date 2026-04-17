@@ -38,7 +38,7 @@ int gyro_z = 0;
 
 const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
 
-byte databuffer[512]; //Fill this before writing to SD
+byte databuffer[512];//Fill this before writing to SD
 
 int mode_pin = 2; //connected to AUX1 on RX
 int arm_pin = 3; //connected to GEAR on RX
@@ -49,6 +49,7 @@ int16_t pulse_width_A;
 
 bool Arm;
 bool Mode;
+bool started_writing; //set to 1 when file is first writtent to
 
 void mode() {
   if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
@@ -70,11 +71,11 @@ void arm() {
   if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
     pulse_width_A = micros() - pulse_start_A;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
-      Arm = 1 //is armed
+      Arm = 1; //is armed
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       //Serial.println("LOW");
-      Arm = 0 //is disarmed
+      Arm = 0; //is disarmed
     }
   }
   else {
@@ -87,10 +88,11 @@ void setup() {
 //wait for arming
 
   Serial.begin(9600);
-  while (!Serial) {} // Wait for serial
+  //while (!Serial) {} // Wait for serial
 
   pulse_start_A = 0;
   Arm = 0;
+  started_writing = 0;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
@@ -104,81 +106,85 @@ void setup() {
   Serial.println("SD card initialized.");
 
     // Open the file for writing
-  if (file.open(filename, O_CREAT | O_WRITE)) {
-    Serial.println("Writing to file");
-  }
+  file.open(filename, O_CREAT | O_WRITE);
 
 }
 
 void loop() {
-  while (packet_number < 18) { //databuffer is not yet full
-    offset = len_packet * packet_number; //offset for packets 2, 3 ... 18
+  while (Arm == 1) {//start recording when armed
 
-    //time first
-    time = micros();
-    databuffer[0 + offset] = time >> 24;
-    databuffer[1 + offset] = time >> 16;
-    databuffer[2 + offset] = time >> 8;
-    databuffer[3 + offset] = time;
+    Serial.println("Writing to file");
+    started_writing = 1;
 
-    //flight channels
-    databuffer[4 + offset] = thr >> 8;
-    databuffer[5 + offset] = thr;
-    
-    databuffer[6 + offset] = ail >> 8;
-    databuffer[7 + offset] = ail;
-    
-    databuffer[8 + offset] = ele >> 8;
-    databuffer[9 + offset] = ele;
-    
-    databuffer[10 + offset] = rud >> 8;
-    databuffer[11 + offset] = rud;
+    while (packet_number < 18) { //databuffer is not yet full
+      offset = len_packet * packet_number; //offset for packets 2, 3 ... 18
 
-    //gyro data
-    databuffer[12 + offset] = acc_x >> 8;
-    databuffer[13 + offset] = acc_x;
-    
-    databuffer[14 + offset] = acc_y >> 8;
-    databuffer[15 + offset] = acc_y;
-    
-    databuffer[16 + offset] = acc_z >> 8;
-    databuffer[17 + offset] = acc_z;
-    
-    databuffer[18 + offset] = gyro_x >> 8;
-    databuffer[19 + offset] = gyro_x;
+      //time first
+      time = micros();
+      databuffer[0 + offset] = time >> 24;
+      databuffer[1 + offset] = time >> 16;
+      databuffer[2 + offset] = time >> 8;
+      databuffer[3 + offset] = time;
 
-    databuffer[20 + offset] = gyro_y >> 8;
-    databuffer[21 + offset] = gyro_y;
-    
-    databuffer[22 + offset] = gyro_z >> 8;
-    databuffer[23 + offset] = gyro_z;
+      //flight channels
+      databuffer[4 + offset] = thr >> 8;
+      databuffer[5 + offset] = thr;
+      
+      databuffer[6 + offset] = ail >> 8;
+      databuffer[7 + offset] = ail;
+      
+      databuffer[8 + offset] = ele >> 8;
+      databuffer[9 + offset] = ele;
+      
+      databuffer[10 + offset] = rud >> 8;
+      databuffer[11 + offset] = rud;
 
-    //arm and mode
-    databuffer[24 + offset] = Arm;
-    databuffer[25 + offset] = Mode;
+      //gyro data
+      databuffer[12 + offset] = acc_x >> 8;
+      databuffer[13 + offset] = acc_x;
+      
+      databuffer[14 + offset] = acc_y >> 8;
+      databuffer[15 + offset] = acc_y;
+      
+      databuffer[16 + offset] = acc_z >> 8;
+      databuffer[17 + offset] = acc_z;
+      
+      databuffer[18 + offset] = gyro_x >> 8;
+      databuffer[19 + offset] = gyro_x;
 
-    //padding to 28 bytes:
-    databuffer[26 + offset] = 0;
-    databuffer[27 + offset] = 0;
-    
-    //Serial.println("iteration complete");
-    packet_number ++;
-    //delay(10);
+      databuffer[20 + offset] = gyro_y >> 8;
+      databuffer[21 + offset] = gyro_y;
+      
+      databuffer[22 + offset] = gyro_z >> 8;
+      databuffer[23 + offset] = gyro_z;
+
+      //arm and mode
+      databuffer[24 + offset] = Arm;
+      databuffer[25 + offset] = Mode;
+
+      //padding to 28 bytes:
+      databuffer[26 + offset] = 0;
+      databuffer[27 + offset] = 0;
+      
+      //Serial.println("iteration complete");
+      packet_number ++;
+      //delay(10);
+    }
+    //add padding and write to SD
+    for (int i = 504; i > 512; i++) {
+      databuffer[i] = 0;
+    }
+
+    if (file.write(databuffer, 512) != 512) { //write block to SD
+      sd.errorHalt("write failed");
+    }
+
+    packet_number = 0; //reset packet number for next block
   }
-  //add padding and write to SD
-  for (int i = 504; i > 512; i++) {
-    databuffer[i] = 0;
+
+  if ((Arm == 0) && (started_writing == 1)) {//when disarmed and SD has been written to
+    file.close(); // Close the file
+    Serial.println("Done writing.");
+    delay(1000000000000);
   }
-
-  if (file.write(databuffer, 512) != 512) { //write block to SD
-    sd.errorHalt("write failed");
-  }
-
-  packet_number = 0; //reset packet number for next block
-
-  //when disarmed
-  file.close(); // Close the file
-  Serial.println("Done writing.");
-  delay(1000000000);
-  
 }
