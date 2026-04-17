@@ -18,12 +18,12 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kpx = 0.03; //x axis coefficients
-float Kix = 0.006;
-float Kdx = 0.000;
-float Kpy = 0.03; //y axis coefficients
-float Kiy = 0.006;
-float Kdy = 0.0;
+float Kpx = 0.07; //x axis coefficients
+float Kix = 0.9;
+float Kdx = 0.01;
+float Kpy = 0.1; //y axis coefficients
+float Kiy = 0.01;
+float Kdy = 0.006;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
@@ -179,5 +179,5 @@ void loop() {
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delay(0);
+  delayMicroseconds(1);
 }
