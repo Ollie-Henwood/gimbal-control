@@ -43,6 +43,7 @@ int16_t pulse_width_M; int16_t pulse_width_A;
 int mode_pin = 2; int arm_pin = 3;
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 bool Mode; //1 = Stabilised; 0 = Locked
+bool Arm; //1 = Armed; 0 = Disarmed
 
 float accelx_filtered = 0; //low pass filter
 float accely_filtered = 0;
@@ -111,7 +112,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
-  Mode = 1;
+  Mode = 1; Arm = 0;
 }
 
 void loop() {
