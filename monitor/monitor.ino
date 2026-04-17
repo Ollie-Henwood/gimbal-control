@@ -19,7 +19,6 @@ int8_t packet_number;
 unsigned long time;
 const byte len_packet = 28;
 uint16_t offset;
-byte blocks_to_write = 4;
 
 const byte CS_pin = 10;
 
@@ -172,13 +171,9 @@ void loop() {
   }
 
   packet_number = 0; //reset packet number for next block
-  blocks_to_write --;
 
-  if (blocks_to_write == 0) {
-
-    file.close(); // Close the file
-    Serial.println("Done writing.");
-    delay(1000000000);
-  }
+  file.close(); // Close the file
+  Serial.println("Done writing.");
+  delay(1000000000);
   
 }
