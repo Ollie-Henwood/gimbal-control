@@ -42,7 +42,7 @@ byte databuffer[512]; //Fill this before writing to SD
 
 int mode_pin = 2; //connected to AUX1 on RX
 int arm_pin = 3; //connected to GEAR on RX
-unsigned long pulse_start;
+unsigned long pulse_start_M; unsigned long pulse_start_A;
 volatile byte state = LOW;
 int16_t pulse_width_M;
 int16_t pulse_width_A;
@@ -52,7 +52,7 @@ bool Mode;
 
 void mode() {
   if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
-    pulse_width_M = micros() - pulse_start;
+    pulse_width_M = micros() - pulse_start_M;
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       //Serial.println("HIGH");
       Mode = 1;
@@ -63,30 +63,34 @@ void mode() {
     }
   }
   else {
-    pulse_start = micros();
+    pulse_start_M = micros();
   }
 }
 void arm() {
   if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
-    pulse_width_A = micros() - pulse_start;
+    pulse_width_A = micros() - pulse_start_A;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
-      //Serial.println("        HIGH");
-      Arm = 1;
+      Arm = 1 //is armed
     }
-    else if (pulse_width_A < 1400 & pulse_width_A > 900) {
-      //Serial.println("        LOW");
-      Arm = 0;
+    else if (pulse_width_A < 1400 && pulse_width_A > 900) {
+      //Serial.println("LOW");
+      Arm = 0 //is disarmed
     }
   }
   else {
-    pulse_start = micros();
+    pulse_start_A = micros();
   }
 }
 
 
 void setup() {
+//wait for arming
+
   Serial.begin(9600);
   while (!Serial) {} // Wait for serial
+
+  pulse_start_A = 0;
+  Arm = 0;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
@@ -172,6 +176,7 @@ void loop() {
 
   packet_number = 0; //reset packet number for next block
 
+  //when disarmed
   file.close(); // Close the file
   Serial.println("Done writing.");
   delay(1000000000);
