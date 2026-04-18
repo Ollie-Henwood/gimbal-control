@@ -39,7 +39,8 @@ int16_t pulse_width_A;
 
 bool Arm;
 bool Mode;
-bool started_writing; //set to 1 when file is first writtent to
+bool started_writing;// set to 1 when file is first written to
+bool done_writing;// set to 1 when file is closed; no further SD actions
 
 void mode() {
   if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
@@ -61,11 +62,23 @@ void arm() {
   if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
     pulse_width_A = micros() - pulse_start_A;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
-      Arm = 1; //is armed
+      Arm = 1; //is armed; start writing to SD
+
+      if (started_writing == 0) { //only change this once
+        started_writing = 1;
+      }
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
-      //Serial.println("LOW");
-      Arm = 0; //is disarmed
+      Arm = 0; //is disarmed; stop writing to SD and close file
+
+      if ((started_writing == 1) && (done_writing == 0)) {// ensure this only happens once
+        file.write(databuffer, 512); //final write
+
+        file.close(); // Close the file
+        Serial.println("Done writing.");
+
+        done_writing = 1;// prevent file from being closed again
+      }
     }
   }
   else {
@@ -101,69 +114,70 @@ void setup() {
 }
 
 void loop() {
-  while (Arm == 1) {//start recording when armed
 
-    Serial.println("Writing to file");
-    started_writing = 1;
+  delay(1000);// do a full gimbal PID loop
 
-    while (packet_number < 23) { //databuffer is not yet full
-      offset = len_packet * packet_number; //offset for packets 2, 3 ... 36
+  if ((Arm == 1) && (done_writing == 0)) {//start recording when armed, but not when disarmed again
 
-      //time first
-      time = micros();
-      databuffer[0 + offset] = time >> 24;
-      databuffer[1 + offset] = time >> 16;
-      databuffer[2 + offset] = time >> 8;
-      databuffer[3 + offset] = time;
-
-      //gyro data
-      databuffer[4 + offset] = pid_error_x >> 8;
-      databuffer[5 + offset] = pid_error_x;
-      
-      databuffer[6 + offset] = p_x >> 8;
-      databuffer[7 + offset] = p_x;
-      
-      databuffer[8 + offset] = i_x >> 8;
-      databuffer[9 + offset] = i_x;
-      
-      databuffer[10 + offset] = d_x >> 8;
-      databuffer[11 + offset] = d_x;
-      
-      databuffer[12 + offset] = pid_error_y >> 8;
-      databuffer[13 + offset] = pid_error_y;
-      
-      databuffer[14 + offset] = p_y >> 8;
-      databuffer[15 + offset] = p_y;
-      
-      databuffer[16 + offset] = i_y >> 8;
-      databuffer[17 + offset] = i_y;
-      
-      databuffer[18 + offset] = d_y >> 8;
-      databuffer[19 + offset] = d_y;
-
-      //arm and mode
-      databuffer[20 + offset] = Arm;
-      databuffer[21 + offset] = Mode;
-      
-      //Serial.println("iteration complete");
+    if (packet_number < 22) { //databuffer is not yet full
+      write_packet();
       packet_number ++;
-      //delay(10);
     }
-    //add padding up to 512 bytes
-    for (int i = 506; i > 512; i++) {
-      databuffer[i] = 0;
-    }
+    else {// we are on packet 22 - final packet; add padding and write to SD
+      //add padding up to 512 bytes
+      write_packet();
+      for (int i = 506; i > 512; i++) {
+        databuffer[i] = 0;
+      }
+    
+      Serial.println("Writing to file");
 
-    if (file.write(databuffer, 512) != 512) { //write block to SD
+      if (file.write(databuffer, 512) != 512) { //write block to SD
       sd.errorHalt("write failed");
+      }
+
+      packet_number = 0; //reset packet number for next block
     }
-
-    packet_number = 0; //reset packet number for next block
   }
+}
 
-  if ((Arm == 0) && (started_writing == 1)) {//when disarmed and SD has been written to
-    file.close(); // Close the file
-    Serial.println("Done writing.");
-    delay(1000000000000);
-  }
+
+void write_packet() {
+  offset = len_packet * packet_number; //offset for packets 2, 3 ... 36
+
+  //time first
+  time = micros();
+  databuffer[0 + offset] = time >> 24;
+  databuffer[1 + offset] = time >> 16;
+  databuffer[2 + offset] = time >> 8;
+  databuffer[3 + offset] = time;
+
+  //gyro data
+  databuffer[4 + offset] = pid_error_x >> 8;
+  databuffer[5 + offset] = pid_error_x;
+  
+  databuffer[6 + offset] = p_x >> 8;
+  databuffer[7 + offset] = p_x;
+  
+  databuffer[8 + offset] = i_x >> 8;
+  databuffer[9 + offset] = i_x;
+  
+  databuffer[10 + offset] = d_x >> 8;
+  databuffer[11 + offset] = d_x;
+  
+  databuffer[12 + offset] = pid_error_y >> 8;
+  databuffer[13 + offset] = pid_error_y;
+  
+  databuffer[14 + offset] = p_y >> 8;
+  databuffer[15 + offset] = p_y;
+  
+  databuffer[16 + offset] = i_y >> 8;
+  databuffer[17 + offset] = i_y;
+  
+  databuffer[18 + offset] = d_y >> 8;
+  databuffer[19 + offset] = d_y;
+
+  //arm and mode
+  databuffer[20 + offset] = Arm;
+  databuffer[21 + offset] = Mode;
 }
