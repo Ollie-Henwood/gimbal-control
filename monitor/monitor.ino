@@ -17,24 +17,14 @@ File32 file;
 
 int8_t packet_number;
 unsigned long time;
-const byte len_packet = 28;
+const byte len_packet = 22;
 uint16_t offset;
 
 const byte CS_pin = 10;
 
-//flight channels, to be populated:
-uint16_t thr = 0;
-uint16_t ail = 0;
-uint16_t ele = 0;
-uint16_t rud = 0;
-
 //gyro data to be populated:
-int acc_x = 0;
-int acc_y = 0;
-int acc_z = 0;
-int gyro_x = 0;
-int gyro_y = 0;
-int gyro_z = 0;
+int pid_error_x; int p_x; int i_x; int d_x; 
+int pid_error_y; int p_y; int i_y; int d_y;
 
 const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
 
@@ -116,8 +106,8 @@ void loop() {
     Serial.println("Writing to file");
     started_writing = 1;
 
-    while (packet_number < 18) { //databuffer is not yet full
-      offset = len_packet * packet_number; //offset for packets 2, 3 ... 18
+    while (packet_number < 23) { //databuffer is not yet full
+      offset = len_packet * packet_number; //offset for packets 2, 3 ... 36
 
       //time first
       time = micros();
@@ -126,52 +116,41 @@ void loop() {
       databuffer[2 + offset] = time >> 8;
       databuffer[3 + offset] = time;
 
-      //flight channels
-      databuffer[4 + offset] = thr >> 8;
-      databuffer[5 + offset] = thr;
-      
-      databuffer[6 + offset] = ail >> 8;
-      databuffer[7 + offset] = ail;
-      
-      databuffer[8 + offset] = ele >> 8;
-      databuffer[9 + offset] = ele;
-      
-      databuffer[10 + offset] = rud >> 8;
-      databuffer[11 + offset] = rud;
-
       //gyro data
-      databuffer[12 + offset] = acc_x >> 8;
-      databuffer[13 + offset] = acc_x;
+      databuffer[4 + offset] = pid_error_x >> 8;
+      databuffer[5 + offset] = pid_error_x;
       
-      databuffer[14 + offset] = acc_y >> 8;
-      databuffer[15 + offset] = acc_y;
+      databuffer[6 + offset] = p_x >> 8;
+      databuffer[7 + offset] = p_x;
       
-      databuffer[16 + offset] = acc_z >> 8;
-      databuffer[17 + offset] = acc_z;
+      databuffer[8 + offset] = i_x >> 8;
+      databuffer[9 + offset] = i_x;
       
-      databuffer[18 + offset] = gyro_x >> 8;
-      databuffer[19 + offset] = gyro_x;
-
-      databuffer[20 + offset] = gyro_y >> 8;
-      databuffer[21 + offset] = gyro_y;
+      databuffer[10 + offset] = d_x >> 8;
+      databuffer[11 + offset] = d_x;
       
-      databuffer[22 + offset] = gyro_z >> 8;
-      databuffer[23 + offset] = gyro_z;
+      databuffer[12 + offset] = pid_error_y >> 8;
+      databuffer[13 + offset] = pid_error_y;
+      
+      databuffer[14 + offset] = p_y >> 8;
+      databuffer[15 + offset] = p_y;
+      
+      databuffer[16 + offset] = i_y >> 8;
+      databuffer[17 + offset] = i_y;
+      
+      databuffer[18 + offset] = d_y >> 8;
+      databuffer[19 + offset] = d_y;
 
       //arm and mode
-      databuffer[24 + offset] = Arm;
-      databuffer[25 + offset] = Mode;
-
-      //padding to 28 bytes:
-      databuffer[26 + offset] = 0;
-      databuffer[27 + offset] = 0;
+      databuffer[20 + offset] = Arm;
+      databuffer[21 + offset] = Mode;
       
       //Serial.println("iteration complete");
       packet_number ++;
       //delay(10);
     }
-    //add padding and write to SD
-    for (int i = 504; i > 512; i++) {
+    //add padding up to 512 bytes
+    for (int i = 506; i > 512; i++) {
       databuffer[i] = 0;
     }
 
