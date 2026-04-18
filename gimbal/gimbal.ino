@@ -81,6 +81,7 @@ void arm() {
       setpoint_y = 0;
     }
   }
+  
   else {
     pulse_start_A = micros();
   }
