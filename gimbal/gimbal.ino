@@ -18,12 +18,12 @@ unsigned long currentTime;
 float x = 0.0; //absolute angle x from IMU
 float y = 0.0; //absolute angle y from IMU
 unsigned long lastTime = 0;
-float Kpx = 0.03; //x axis coefficients
-float Kix = 1;
-float Kdx = 0.0001;
-float Kpy = 0.0; //y axis coefficients
-float Kiy = 0.0;
-float Kdy = 0.0;
+float Kpx = 0.07; //x axis coefficients
+float Kix = 0.9;
+float Kdx = 0.01;
+float Kpy = 0.1; //y axis coefficients
+float Kiy = 0.01;
+float Kdy = 0.006;
 float alpha = 0.96; // Complementary filter constant
 
 float setpoint_x;
@@ -43,6 +43,11 @@ int16_t pulse_width_M; int16_t pulse_width_A;
 int mode_pin = 2; int arm_pin = 3;
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 bool Mode; //1 = Stabilised; 0 = Locked
+bool Arm; //1 = Armed; 0 = Disarmed
+
+float accelx_filtered = 0; //low pass filter
+float accely_filtered = 0;
+float accel_alpha = 0.1; // low-pass weight — tune this (smaller = smoother)
 
 void mode() {
   if (digitalRead(mode_pin) == 0) {// Mode switch changes mode
@@ -50,8 +55,9 @@ void mode() {
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       //Serial.println("HIGH");
       Mode = 1;
+      Ix = 0; Iy = 0;  // reset integral on mode switch
     }
-    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
+    else if (pulse_width_M < 1400 && pulse_width_M > 900) {
       //Serial.println("LOW");
       Mode = 0;
     }
@@ -69,7 +75,7 @@ void arm() {
       setpoint_x = -45;
       setpoint_y = -45;
     }
-    else if (pulse_width_A < 1400 & pulse_width_A > 900) {
+    else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       //Serial.println("LOW");
       setpoint_x = 0;
       setpoint_y = 0;
@@ -78,6 +84,11 @@ void arm() {
   else {
     pulse_start_A = micros();
   }
+}
+
+int degToUs(float deg) {
+  // Maps 0-180 degrees to 544-2400 microseconds (Arduino servo library standard)
+  return (int)(544 + (deg / 180.0) * (2400 - 544));
 }
 
 void setup() {
@@ -101,7 +112,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
-  Mode = 1;
+  Mode = 1; Arm = 0;
 }
 
 void loop() {
@@ -121,9 +132,12 @@ void loop() {
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
   
-  // Complementary filter
-  x = alpha * gyrox + (1.0 - alpha) * accelx; //calculated angle x
-  y = alpha * gyroy - (1.0 - alpha) * accely; //calculated angle y
+  // Low-pass filter
+  accelx_filtered = accel_alpha * accelx + (1.0 - accel_alpha) * accelx_filtered;
+  accely_filtered = accel_alpha * accely + (1.0 - accel_alpha) * accely_filtered;
+
+  x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
+  y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
 
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
@@ -132,8 +146,11 @@ void loop() {
     Px = error_x[1] * Kpx; //proportional terms
     Py = error_y[1] * Kpy;
 
-    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
-    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
+    Iy += 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+
+    Ix = constrain(Ix, -30, 30); //prevent integral windup if gimbal is bocked
+    Iy = constrain(Iy, -30, 30);
 
     Dx = (error_x[1] - error_x[0]) / dt * Kdx; //derivative terms
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
@@ -147,8 +164,8 @@ void loop() {
   else { // if in locked mode
     commanded_x = offset_x; commanded_y = offset_y;
   }
-  servo_x.write(commanded_x);
-  servo_y.write(commanded_y);
+  servo_x.writeMicroseconds(degToUs(commanded_x));
+  servo_y.writeMicroseconds(degToUs(commanded_y));
   Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1],4); 
   Serial.print(",Gyro_x:"); Serial.print(x,4);
@@ -163,5 +180,5 @@ void loop() {
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delay(0);
+  delayMicroseconds(1);
 }
