@@ -41,7 +41,6 @@ byte databuffer[512];//Fill this before writing to SD
 int mode_pin = 2; //connected to AUX1 on RX
 int arm_pin = 3; //connected to GEAR on RX
 unsigned long pulse_start_M; unsigned long pulse_start_A;
-volatile byte state = LOW;
 int16_t pulse_width_M;
 int16_t pulse_width_A;
 
