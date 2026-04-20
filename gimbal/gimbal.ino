@@ -142,46 +142,41 @@ int degToUs(float deg) {
   return (int)(544 + (deg / 180.0) * (2400 - 544));
 }
 
-void setup() {  
-  servo_x.attach(servo_pin_x);
-  servo_y.attach(servo_pin_y);
-  Wire.begin();
-  sensor.initialize();
-  lastTime = micros();
-
+void setup() {
   Serial.begin(9600);
-  //while (!Serial) {} // Wait for serial
 
-  pulse_start_A = 0;
-  Arm = 0;
-  started_writing = 0;
-
-  error_x[0] = 0; //initial set of values
-  error_y[0] = 0;
-  commanded_x = 90;
-  commanded_y = 90;
-  offset_x = 86.5; offset_y = 83.6; //Servo angles for straight and level (locked mode)
-
-  setpoint_x = 0;
-  setpoint_y = 0;
-
-  pulse_start_M = 0; pulse_start_A = 0;//initial values
-  Mode = 1; Arm = 0;
-
-  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
-
+  // 1. SD card FIRST, before anything else touches hardware buses
   Serial.println("\nInitializing SD card...");
-
-  // Initialize SdFat or print a detailed error message and halt
-  if (!sd.begin(CS_pin, SPI_HALF_SPEED)) { // Use SPI_FULL_SPEED for better performance (when soldered)
+  if (!sd.begin(CS_pin, SPI_HALF_SPEED)) {
     sd.initErrorHalt("sd:");
   }
   Serial.println("SD card initialized.");
-
-    // Open the file for writing
   file.open(filename, O_CREAT | O_WRITE);
 
+  // 2. I2C / MPU6050 after SD is stable
+  Wire.begin();
+  sensor.initialize();
+  delay(100); // Let MPU6050 settle
+
+  // 3. Servos after both buses are initialised
+  servo_x.attach(servo_pin_x);
+  servo_y.attach(servo_pin_y);
+
+  // 4. Everything else
+  lastTime = micros();
+  pulse_start_M = 0; pulse_start_A = 0;
+  Mode = 1; Arm = 0;
+  started_writing = 0;
+  error_x[0] = 0;
+  error_y[0] = 0;
+  commanded_x = 90;
+  commanded_y = 90;
+  offset_x = 86.5; offset_y = 83.6;
+  setpoint_x = 0;
+  setpoint_y = 0;
+
+  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 }
 
 void loop() {
