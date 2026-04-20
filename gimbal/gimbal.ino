@@ -1,11 +1,60 @@
+#include <SPI.h>
+#include <SdFat.h> //using SdFat library as it is faster to read and write
 #include<Wire.h>
 #include<MPU6050.h>
 #include<Servo.h>
 
+/*Wiring data:
+CLK/SCK: Pin 13
+DO/MISO: Pin 12
+DI/MOSI: Pin 11
+CS: Pin 10 (or any digital pin)*/
+
+/*Things to add:
+File folder that stores all previous flights
+Folder that just stores current flight data
+Assign each byte to data*/
+
+//SD things
+SdFat32 sd;
+File32 file;
+
+int8_t packet_number;
+unsigned long time;
+const byte len_packet = 22;
+uint16_t offset;
+
+const byte CS_pin = 10;
+
+bool started_writing;// set to 1 when file is first written to
+bool done_writing;// set to 1 when file is closed; no further SD actions
+
+//gyro data to be populated:
+int pid_error_x; int p_x; int i_x; int d_x; 
+int pid_error_y; int p_y; int i_y; int d_y;
+
+const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
+
+byte databuffer[512];//Fill this before writing to SD
+
+//Radio things
+int mode_pin = 2; //connected to AUX1 on RX
+int arm_pin = 3; //connected to GEAR on RX
+unsigned long pulse_start_M; unsigned long pulse_start_A;
+volatile byte state = LOW;
+int16_t pulse_width_M;
+int16_t pulse_width_A;
+
+bool Mode; //1 = Stabilised; 0 = Locked
+bool Arm; //1 = Armed; 0 = Disarmed
+
+//Servo things
 Servo servo_x;
 Servo servo_y;
 int servo_pin_x = 5;
 int servo_pin_y = 6;
+
+//Gyro things
 MPU6050 sensor;  //SDA into A4, SCL into A5
 
 int16_t ax, ay, az;
@@ -39,25 +88,19 @@ float Dx, Dy;
 float commanded_x, commanded_y;
 float offset_x, offset_y;
 
-int16_t pulse_width_M; int16_t pulse_width_A;
-int mode_pin = 2; int arm_pin = 3;
-unsigned long pulse_start_M; unsigned long pulse_start_A;
-bool Mode; //1 = Stabilised; 0 = Locked
-bool Arm; //1 = Armed; 0 = Disarmed
-
 float accelx_filtered = 0; //low pass filter
 float accely_filtered = 0;
 float accel_alpha = 0.1; // low-pass weight — tune this (smaller = smoother)
 
 void mode() {
-  if (digitalRead(mode_pin) == 0) {// Mode switch changes mode
+  if (digitalRead(mode_pin) == 0) {//means pulse changed high->low
     pulse_width_M = micros() - pulse_start_M;
     if (pulse_width_M < 2100 & pulse_width_M > 1600) {
       //Serial.println("HIGH");
       Mode = 1;
       Ix = 0; Iy = 0;  // reset integral on mode switch
     }
-    else if (pulse_width_M < 1400 && pulse_width_M > 900) {
+    else if (pulse_width_M < 1400 & pulse_width_M > 900) {
       //Serial.println("LOW");
       Mode = 0;
     }
@@ -68,17 +111,26 @@ void mode() {
 }
 
 void arm() {
-  if (digitalRead(arm_pin) == 0) {// Arm switch changes setpoint
+  if (digitalRead(arm_pin) == 0) {//means pulse changed high->low
     pulse_width_A = micros() - pulse_start_A;
     if (pulse_width_A < 2100 & pulse_width_A > 1600) {
-      //Serial.println("HIGH");
-      setpoint_x = -45;
-      setpoint_y = -45;
+      Arm = 1; //is armed; start writing to SD
+
+      if (started_writing == 0) { //only change this once
+        started_writing = 1;
+      }
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
-      //Serial.println("LOW");
-      setpoint_x = 0;
-      setpoint_y = 0;
+      Arm = 0; //is disarmed; stop writing to SD and close file
+
+      if ((started_writing == 1) && (done_writing == 0)) {// ensure this only happens once
+        file.write(databuffer, 512); //final write
+
+        file.close(); // Close the file
+        Serial.println("Done writing.");
+
+        done_writing = 1;// prevent file from being closed again
+      }
     }
   }
   else {
@@ -91,13 +143,19 @@ int degToUs(float deg) {
   return (int)(544 + (deg / 180.0) * (2400 - 544));
 }
 
-void setup() {
+void setup() {  
   servo_x.attach(servo_pin_x);
   servo_y.attach(servo_pin_y);
   Wire.begin();
-  Serial.begin(115200);
   sensor.initialize();
   lastTime = micros();
+
+  Serial.begin(9600);
+  //while (!Serial) {} // Wait for serial
+
+  pulse_start_A = 0;
+  Arm = 0;
+  started_writing = 0;
 
   error_x[0] = 0; //initial set of values
   error_y[0] = 0;
@@ -108,14 +166,95 @@ void setup() {
   setpoint_x = 0;
   setpoint_y = 0;
 
-  pulse_start_M = 0; pulse_start_A = 0;
-  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
-
+  pulse_start_M = 0; pulse_start_A = 0;//initial values
   Mode = 1; Arm = 0;
+
+  attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
+
+  Serial.println("\nInitializing SD card...");
+
+  // Initialize SdFat or print a detailed error message and halt
+  if (!sd.begin(CS_pin, SPI_HALF_SPEED)) { // Use SPI_FULL_SPEED for better performance (when soldered)
+    sd.initErrorHalt("sd:");
+  }
+  Serial.println("SD card initialized.");
+
+    // Open the file for writing
+  file.open(filename, O_CREAT | O_WRITE);
+
 }
 
 void loop() {
+
+  pid_loop();// do a full gimbal PID loop
+
+  if ((Arm == 1) && (done_writing == 0)) {//start recording when armed, but not when disarmed again
+
+    if (packet_number < 22) { //databuffer is not yet full
+      write_packet();
+      packet_number ++;
+    }
+    else {// we are on packet 22 - final packet; add padding and write to SD
+      //add padding up to 512 bytes
+      write_packet();
+      for (int i = 506; i > 512; i++) {
+        databuffer[i] = 0;
+      }
+    
+      Serial.println("Writing to file");
+
+      if (file.write(databuffer, 512) != 512) { //write block to SD
+      sd.errorHalt("write failed");
+      }
+
+      packet_number = 0; //reset packet number for next block
+    }
+  }
+}
+
+
+void write_packet() {
+  offset = len_packet * packet_number; //offset for packets 2, 3 ... 36
+
+  //time first
+  time = micros();
+  databuffer[0 + offset] = time >> 24;
+  databuffer[1 + offset] = time >> 16;
+  databuffer[2 + offset] = time >> 8;
+  databuffer[3 + offset] = time;
+
+  //gyro data
+  databuffer[4 + offset] = pid_error_x >> 8;
+  databuffer[5 + offset] = pid_error_x;
+  
+  databuffer[6 + offset] = p_x >> 8;
+  databuffer[7 + offset] = p_x;
+  
+  databuffer[8 + offset] = i_x >> 8;
+  databuffer[9 + offset] = i_x;
+  
+  databuffer[10 + offset] = d_x >> 8;
+  databuffer[11 + offset] = d_x;
+  
+  databuffer[12 + offset] = pid_error_y >> 8;
+  databuffer[13 + offset] = pid_error_y;
+  
+  databuffer[14 + offset] = p_y >> 8;
+  databuffer[15 + offset] = p_y;
+  
+  databuffer[16 + offset] = i_y >> 8;
+  databuffer[17 + offset] = i_y;
+  
+  databuffer[18 + offset] = d_y >> 8;
+  databuffer[19 + offset] = d_y;
+
+  //arm and mode
+  databuffer[20 + offset] = Arm;
+  databuffer[21 + offset] = Mode;
+}
+
+void pid_loop() {
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
   // Time difference
@@ -180,5 +319,5 @@ void loop() {
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  delayMicroseconds(1);
+  //delayMicroseconds(1);
 }
