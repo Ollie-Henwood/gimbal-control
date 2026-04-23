@@ -30,16 +30,16 @@ bool started_writing;// set to 1 when file is first written to
 bool done_writing;// set to 1 when file is closed; no further SD actions
 
 //gyro data to be populated:
-int pid_error_x; int p_x; int i_x; int d_x; 
-int pid_error_y; int p_y; int i_y; int d_y;
+int16_t pid_error_x; int16_t p_x; int16_t i_x; int16_t d_x; 
+int16_t pid_error_y; int16_t p_y; int16_t i_y; int16_t d_y;
 
 const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
 
 byte databuffer[512];//Fill this before writing to SD
 
 //Radio things
-int mode_pin = 2; //connected to AUX1 on RX
-int arm_pin = 3; //connected to GEAR on RX
+byte mode_pin = 2; //connected to AUX1 on RX
+byte arm_pin = 3; //connected to GEAR on RX
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 int16_t pulse_width_M;
 int16_t pulse_width_A;
@@ -50,8 +50,8 @@ bool Arm; //1 = Armed; 0 = Disarmed
 //Servo things
 Servo servo_x;
 Servo servo_y;
-int servo_pin_x = 5;
-int servo_pin_y = 6;
+byte servo_pin_x = 5;
+byte servo_pin_y = 6;
 
 //Gyro things
 MPU6050 sensor;  //SDA into A4, SCL into A5
@@ -142,7 +142,7 @@ int degToUs(float deg) {
   return (int)(544 + (deg / 180.0) * (2400 - 544));
 }
 
-void setup() {
+void setup() {  
   servo_x.attach(servo_pin_x);
   servo_y.attach(servo_pin_y);
   Wire.begin();
