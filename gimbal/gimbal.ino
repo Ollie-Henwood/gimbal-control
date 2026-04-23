@@ -174,7 +174,7 @@ void setup() {
   Serial.println(F("\nInitializing SD card..."));
 
   // Initialize SdFat or print a detailed error message and halt
-  if (!sd.begin(CS_pin, SPI_HALF_SPEED)) { // Use SPI_FULL_SPEED for better performance (when soldered)
+  if (!sd.begin(CS_pin, SPI_FULL_SPEED)) { // Use SPI_FULL_SPEED for better performance (when soldered)
     sd.initErrorHalt("sd:");
   }
   Serial.println(F("SD card initialized."));
