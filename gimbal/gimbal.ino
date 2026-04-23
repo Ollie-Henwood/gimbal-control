@@ -304,7 +304,7 @@ void pid_loop() {
   }
   servo_x.writeMicroseconds(degToUs(commanded_x));
   servo_y.writeMicroseconds(degToUs(commanded_y));
-  Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
+  /*Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
   Serial.print(",Error_x:"); Serial.print(error_x[1],4); 
   Serial.print(",Gyro_x:"); Serial.print(x,4);
   Serial.print(",P_x:"); Serial.print(Px,6);
@@ -313,7 +313,7 @@ void pid_loop() {
   //Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
   //Serial.print(",Error_y:"); Serial.print(error_y[1]); 
   //Serial.print(",Gyro_y:"); Serial.print(y);
-  Serial.println("\r\n");
+  Serial.println("\r\n");*/
   
   lastTime = currentTime; //setup for next iteration
   error_x[0] = error_x[1];
