@@ -19,7 +19,7 @@ Assign each byte to data*/
 SdFat32 sd;
 File32 file;
 
-int8_t packet_number;
+byte packet_number;
 unsigned long time;
 const byte len_packet = 22;
 uint16_t offset;
@@ -165,6 +165,8 @@ void setup() {
   setpoint_x = 0;
   setpoint_y = 0;
 
+  packet_number = 0;
+
   pulse_start_M = 0; pulse_start_A = 0;//initial values
   Mode = 1; Arm = 0;
 
@@ -215,6 +217,15 @@ void loop() {
 
 void write_packet() {
   offset = len_packet * packet_number; //offset for packets 2, 3 ... 36
+
+  pid_error_x = error_x[0] * 100;
+  p_x = Px * 100;
+  i_x = Ix * 100;
+  d_x = Dx * 100;
+  pid_error_y = error_y[0] * 100;
+  p_y = Py * 100;
+  i_y = Iy * 100;
+  d_y = Dy * 100;
 
   //time first
   time = micros();
