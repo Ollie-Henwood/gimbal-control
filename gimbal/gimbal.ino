@@ -17,7 +17,9 @@ Assign each byte to data*/
 
 //SD things
 SdFat32 sd;
-File32 file;
+File32 root;
+File32 entry;
+char flightDat[32];
 
 int8_t packet_number;
 unsigned long time;
@@ -33,7 +35,7 @@ bool done_writing;// set to 1 when file is closed; no further SD actions
 int pid_error_x; int p_x; int i_x; int d_x; 
 int pid_error_y; int p_y; int i_y; int d_y;
 
-const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
+//const char* filename = "test2.bin"; //change to read all files, then name this file +1 greater than previous
 
 byte databuffer[512];//Fill this before writing to SD
 
@@ -180,7 +182,19 @@ void setup() {
   Serial.println(F("SD card initialized."));
 
     // Open the file for writing
-  file.open(filename, O_CREAT | O_WRITE);
+    //file.open(filename, O_CREAT | O_WRITE);
+  root.open("/")
+  while (true) {
+    entry = root.openNextFile();
+    if (!entry) break;
+
+    if(!entry.isDir()) {
+      strcpy(flightDatName, entry.name());
+    }
+  }
+  flightDatName = "test" + String(int(entry.name()[4] + 1)) + ".bin"
+  entry.close();
+  File32 flightFile = sd.open(flightDatName, O_CREAT | O_WRITE)
 
 }
 
