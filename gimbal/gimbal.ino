@@ -126,7 +126,7 @@ void arm() {
         file.write(databuffer, 512); //final write
 
         file.close(); // Close the file
-        Serial.println("Done writing.");
+        Serial.println(F("Done writing."));
 
         done_writing = 1;// prevent file from being closed again
       }
@@ -171,13 +171,13 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE); //Usable pins for interrupts are 2 and 3
 
-  Serial.println("\nInitializing SD card...");
+  Serial.println(F("\nInitializing SD card..."));
 
   // Initialize SdFat or print a detailed error message and halt
   if (!sd.begin(CS_pin, SPI_HALF_SPEED)) { // Use SPI_FULL_SPEED for better performance (when soldered)
     sd.initErrorHalt("sd:");
   }
-  Serial.println("SD card initialized.");
+  Serial.println(F("SD card initialized."));
 
     // Open the file for writing
   file.open(filename, O_CREAT | O_WRITE);
@@ -201,7 +201,7 @@ void loop() {
         databuffer[i] = 0;
       }
     
-      Serial.println("Writing to file");
+      //Serial.println(F("Writing to file"));
 
       if (file.write(databuffer, 512) != 512) { //write block to SD
       sd.errorHalt("write failed");
