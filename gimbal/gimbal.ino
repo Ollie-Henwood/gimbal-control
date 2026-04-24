@@ -194,7 +194,7 @@ void setup() {
     entry.close();
   }
 
-  sprintf(flightDatName, "test%d.bin", index);
+  sprintf(flightDatName, "log%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
 
