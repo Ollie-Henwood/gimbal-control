@@ -257,56 +257,54 @@ void write_packet() {
   databuffer[2 + offset] = currentTime >> 8;
   databuffer[3 + offset] = currentTime;
 
-  //gyro data
+  pid_error_x = error_x[0];
+
   databuffer[4 + offset] = pid_error_x >> 8;
   databuffer[5 + offset] = pid_error_x;
-  
+
   databuffer[6 + offset] = p_x >> 8;
   databuffer[7 + offset] = p_x;
-  
+
   databuffer[8 + offset] = i_x >> 8;
   databuffer[9 + offset] = i_x;
-  
+
   databuffer[10 + offset] = d_x >> 8;
   databuffer[11 + offset] = d_x;
-  
+
   databuffer[12 + offset] = pid_error_y >> 8;
   databuffer[13 + offset] = pid_error_y;
-  
+
   databuffer[14 + offset] = p_y >> 8;
   databuffer[15 + offset] = p_y;
-  
+
   databuffer[16 + offset] = i_y >> 8;
   databuffer[17 + offset] = i_y;
-  
+
   databuffer[18 + offset] = d_y >> 8;
   databuffer[19 + offset] = d_y;
 
-  //arm and mode
   databuffer[20 + offset] = Arm;
   databuffer[21 + offset] = Mode;
+  Serial.println(pid_error_x);
 }
 
 void pid_loop() {
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-  
-  // Time difference
+
   currentTime = micros();
-  dt = float(currentTime - lastTime) / second;
-  
-  // Gyro contribution (integration)
+  dt = (currentTime - lastTime) * 1e-6;
+
   float gyroRate = gx / 131.0;
   float gyrox = x + gyroRate * dt;
+
   float gyroRate2 = gy / 131.0;
   float gyroy = y + gyroRate2 * dt;
-  
-  // Accelerometer contribution (tilt angle from gravity)
+
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
-  
-  // Low-pass filter
-  accelx_filtered = accel_alpha * accelx + (1.0 - accel_alpha) * accelx_filtered;
-  accely_filtered = accel_alpha * accely + (1.0 - accel_alpha) * accely_filtered;
+
+  accelx_filtered = accelx * accel_alpha + accelx_filtered * (1.0 - accel_alpha);
+  accely_filtered = accely * accel_alpha + accely_filtered * (1.0 - accel_alpha);
 
   x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
   y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
@@ -314,43 +312,31 @@ void pid_loop() {
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
 
-  if (Mode == 1) { // if in stabilising mode
-    Px = error_x[1] * Kpx; //proportional terms
+  if (Mode == 1) {
+    Px = error_x[1] * Kpx;
     Py = error_y[1] * Kpy;
 
-    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix; //integral terms
+    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix;
     Iy += 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
 
-    Ix = constrain(Ix, -30, 30); //prevent integral windup if gimbal is bocked
-    Iy = constrain(Iy, -30, 30);
-
-    Dx = (error_x[1] - error_x[0]) / dt * Kdx; //derivative terms
+    Dx = (error_x[1] - error_x[0]) / dt * Kdx;
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
 
-    commanded_x -= (Px + Ix + Dx); //calculated PID error
+    commanded_x -= (Px + Ix + Dx);
     commanded_y -= (Py + Iy + Dy);
 
-    commanded_x = constrain(commanded_x, 0, 180); //ensure values do not go beyond servo's range and change direction based on IMU orientation
+    commanded_x = constrain(commanded_x, 0, 180);
     commanded_y = constrain(commanded_y, 0, 180);
   }
-  else { // if in locked mode
-    commanded_x = offset_x; commanded_y = offset_y;
+  else {
+    commanded_x = offset_x;
+    commanded_y = offset_y;
   }
+
   servo_x.writeMicroseconds(degToUs(commanded_x));
   servo_y.writeMicroseconds(degToUs(commanded_y));
-  /*Serial.print(">Setpoint_x:"); Serial.print(setpoint_x,4); // following Serial Plotter syntax, eg: >Error:0.0342,Offset:234\r\n
-  Serial.print(",Error_x:"); Serial.print(error_x[1],4); 
-  Serial.print(",Gyro_x:"); Serial.print(x,4);
-  Serial.print(",P_x:"); Serial.print(Px,6);
-  Serial.print(",I_x:"); Serial.print(Ix,6);
-  Serial.print(",D_x:"); Serial.print(Dx,6);
-  //Serial.print(",Setpoint_y:"); Serial.print(setpoint_y);
-  //Serial.print(",Error_y:"); Serial.print(error_y[1]); 
-  //Serial.print(",Gyro_y:"); Serial.print(y);
-  Serial.println("\r\n");*/
-  
-  lastTime = currentTime; //setup for next iteration
+
+  lastTime = currentTime;
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-  //delayMicroseconds(1);
 }
