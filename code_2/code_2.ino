@@ -113,6 +113,7 @@ void arm() {
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       Arm = 0;
+      Serial.println(0);
     }
   }
   else {
@@ -189,18 +190,30 @@ void loop() {
 
   pid_loop();
 
-  if ((Arm == 1) && (done_writing == 1)) {
-    done_writing = 0;
+  //open file
+  if ((Arm == 1) && !(file.isOpen())) {
+    open_file();
+    Serial.println('File opened');
   }
 
-  if ((Arm == 1) && (done_writing == 0)) {
+  if (Arm == 1) {
+    do_write();
+  }
 
-    if (packet_number < packets_per_block) {
-      write_packet();
-      packet_number++;
-    }
-    else {
-      write_packet();
+  if ((Arm == 0) && (file.isOpen())){
+    close_file();
+    Serial.println('File closed');
+  }
+  //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+}
+
+void do_write() {
+  if (packet_number < 10) {
+    write_packet();
+    packet_number++;
+  }
+  else {
+    write_packet();
 
     for (int i = 242; i < 256; i++) {
       databuffer[i] = 0;
@@ -209,20 +222,18 @@ void loop() {
     file.write(databuffer, 256);
     file.sync();
 
-      packet_number = 0;
-    }
+    packet_number = 0;
   }
+}
 
-  if ((done_writing == 1) && (file.isOpen())){
-    if (packet_number > 0) {
+void close_file() { //checks if any data is left over, writes it, and closes file
+  if (packet_number > 0) {
       file.write(databuffer, 256);
       file.sync();
     }
 
-    file.close();
-    Serial.println(F("Done writing."));
-  }
-  //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+  file.close();
+  Serial.println(F("Done writing."));
 }
 
 void write_packet() {
