@@ -38,6 +38,8 @@ int16_t pulse_width_A;
 bool Mode;
 bool Arm;
 
+bool file_isopen;
+
 //Servo things
 Servo servo_x;
 Servo servo_y;
@@ -144,6 +146,7 @@ void setup() {
 
   Mode = 1;
   packet_number = 0;
+  file_isopen = 0;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
@@ -171,7 +174,7 @@ void open_file() {
     }
     entry.close();
   }
-
+  root.close();
   sprintf(flightDatName, "log%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
@@ -183,17 +186,20 @@ void loop() {
   pid_loop();
 
   //open file
-  if ((Arm == 1) && (!file.isOpen())) {
+  if ((Arm == 1) && (file_isopen == 0)) {
     open_file();
+    file_isopen = 1;
+    Serial.println(flightDatName);
   }
 
-  if (Arm == 1) {
+  if (file_isopen == 1) {
     do_write();
   }
 
-  if ((Arm == 0) && (file.isOpen())){
+  if ((Arm == 0) && (file_isopen == 1)){
     close_file();
     Serial.println(F("File closed"));
+    file_isopen = 0;
   }
   //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
 }
