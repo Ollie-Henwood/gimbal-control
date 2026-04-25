@@ -223,7 +223,7 @@ void loop() {
     }
   }
 
-  if (done_writing == 1) && (sd.exists(flightDatName)){
+  if (done_writing == 1) && (!file.isOpen()){
     if (packet_number > 0) {
       file.write(databuffer, 256);
       file.sync();
