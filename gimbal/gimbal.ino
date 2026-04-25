@@ -20,33 +20,27 @@ SdFat32 sd;
 File32 file;
 File32 root;
 File32 entry;
-char flightDatName[32];
+char flightDatName[11];
 
 int8_t packet_number = 0;
 unsigned long currentTime;
 const byte len_packet = 22;
 uint16_t offset;
 
-volatile bool should_close = false;
-
 const byte CS_pin = 10;
-
-bool started_writing;// set to 1 when file is first written to
-bool done_writing;// set to 1 when file is closed; no further SD actions
 
 //gyro data
 int pid_error_x; int p_x; int i_x; int d_x; 
 int pid_error_y; int p_y; int i_y; int d_y;
 
-// ✅ CHANGED: 512 → 256
 byte databuffer[256];
 
 // packets per 256-byte block (11 * 22 = 242 bytes)
 const byte packets_per_block = 11;
 
 //Radio things
-int mode_pin = 2; //connected to AUX1 on RX
-int arm_pin = 3; //connected to GEAR on RX
+const int mode_pin = 2; //connected to AUX1 on RX
+const int arm_pin = 3; //connected to GEAR on RX
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 int16_t pulse_width_M;
 int16_t pulse_width_A;
@@ -54,11 +48,13 @@ int16_t pulse_width_A;
 bool Mode; //1 = Stabilised; 0 = Locked
 bool Arm; //1 = Armed; 0 = Disarmed
 
+bool file_isopen;
+
 //Servo things
 Servo servo_x;
 Servo servo_y;
-int servo_pin_x = 5;
-int servo_pin_y = 6;
+const byte servo_pin_x = 5;
+const byte servo_pin_y = 6;
 
 //Gyro things
 MPU6050 sensor;  //SDA into A4, SCL into A5
@@ -69,7 +65,6 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-// constants (flash storage)
 const float Kpx = 0.07;
 const float Kix = 0.9;
 const float Kdx = 0.01;
@@ -120,15 +115,9 @@ void arm() {
 
     if (pulse_width_A < 2100 && pulse_width_A > 1600) {
       Arm = 1;
-      if (started_writing == 0) {
-        started_writing = 1;
-      }
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       Arm = 0;
-      if ((started_writing == 1) && (done_writing == 0)) {
-        should_close = true;
-      }
     }
   }
   else {
@@ -141,6 +130,8 @@ int degToUs(float deg) {
 }
 
 void setup() {
+  Mode = 1;
+  Arm = 0;
   servo_x.attach(servo_pin_x);
   servo_y.attach(servo_pin_y);
   Wire.begin();
@@ -149,10 +140,8 @@ void setup() {
 
   Serial.begin(9600);
 
+  pulse_start_M = 0;
   pulse_start_A = 0;
-  Arm = 0;
-  started_writing = 0;
-  done_writing = 0;
 
   error_x[0] = 0;
   error_y[0] = 0;
@@ -166,8 +155,8 @@ void setup() {
   setpoint_x = 0;
   setpoint_y = 0;
 
-  pulse_start_M = 0;
-  Mode = 1;
+  packet_number = 0;
+  file_isopen = 0;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
@@ -179,7 +168,9 @@ void setup() {
   }
 
   Serial.println(F("SD card initialized."));
+}
 
+void open_file() {
   int index = 0;
 
   root.open("/");
@@ -193,58 +184,63 @@ void setup() {
     }
     entry.close();
   }
-
+  root.close();
   sprintf(flightDatName, "log%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
-
-  if (!file) {
-    Serial.println("File open failed!");
-    while (1);
-  }
+  Serial.println(F("File opened"));
 }
 
 void loop() {
 
   pid_loop();
 
-  // ✅ UPDATED: 22 → 11 packets
-  if ((Arm == 1) && (done_writing == 0)) {
-
-    if (packet_number < packets_per_block) {
-      write_packet();
-      packet_number++;
-    }
-    else {
-      write_packet();
-
-      // ✅ FIXED: padding for 256 bytes
-      for (int i = packets_per_block * len_packet; i < 256; i++) {
-        databuffer[i] = 0;
-      }
-
-      if (file.write(databuffer, 256) != 256) {
-        sd.errorHalt("write failed");
-      }
-
-      file.sync();
-
-      packet_number = 0;
-    }
+  //open file
+  if ((Arm == 1) && (file_isopen == 0)) {
+    open_file();
+    file_isopen = 1;
+    Serial.println(flightDatName);
   }
 
-  if (should_close) {
-    if (packet_number > 0) {
+  if (file_isopen == 1) {
+    do_write();
+  }
+
+  if ((Arm == 0) && (file_isopen == 1)){
+    close_file();
+    Serial.println(F("File closed"));
+    file_isopen = 0;
+  }
+  //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+}
+
+void do_write() {
+  if (packet_number < 10) {
+    write_packet();
+    packet_number++;
+  }
+  else {
+    write_packet();
+
+    for (int i = 242; i < 256; i++) {
+      databuffer[i] = 0;
+    }
+
+    file.write(databuffer, 256);
+    file.sync();
+
+    packet_number = 0;
+  }
+}
+
+void close_file() { //checks if any data is left over, writes it, and closes file
+  if (packet_number > 0) {
       file.write(databuffer, 256);
       file.sync();
     }
 
-    file.close();
-    Serial.println(F("Done writing."));
-
-    done_writing = 1;
-    should_close = false;
-  }
+  file.close();
+  Serial.println(F("Done writing."));
 }
 
 void write_packet() {
