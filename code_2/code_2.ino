@@ -110,11 +110,9 @@ void arm() {
 
     if (pulse_width_A < 2100 && pulse_width_A > 1600) {
       Arm = 1;
-      done_writing = 0; //I added this so that if we wanted to have it so that if you switch arm mode back on, it will carry-on writing data
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       Arm = 0;
-      done_writing = 1;
     }
   }
   else {
