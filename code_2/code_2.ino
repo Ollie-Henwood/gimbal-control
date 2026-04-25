@@ -164,7 +164,9 @@ void setup() {
   }
 
   Serial.println(F("SD card initialized."));
+}
 
+void open_file() {
   int index = 0;
 
   root.open("/");
