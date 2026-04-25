@@ -138,8 +138,6 @@ void setup() {
   sensor.initialize();
   lastTime = micros();
 
-  Serial.begin(9600);
-
   pulse_start_M = 0;
   pulse_start_A = 0;
 
@@ -161,13 +159,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
-  Serial.println(F("\nInitializing SD card..."));
-
   if (!sd.begin(CS_pin, SPI_FULL_SPEED)) {
     sd.initErrorHalt("sd:");
   }
-
-  Serial.println(F("SD card initialized."));
 }
 
 void open_file() {
@@ -188,7 +182,6 @@ void open_file() {
   sprintf(flightDatName, "log%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
-  Serial.println(F("File opened"));
 }
 
 void loop() {
@@ -199,7 +192,6 @@ void loop() {
   if ((Arm == 1) && (file_isopen == 0)) {
     open_file();
     file_isopen = 1;
-    Serial.println(flightDatName);
   }
 
   if (file_isopen == 1) {
@@ -208,7 +200,6 @@ void loop() {
 
   if ((Arm == 0) && (file_isopen == 1)){
     close_file();
-    Serial.println(F("File closed"));
     file_isopen = 0;
   }
   //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
@@ -240,7 +231,6 @@ void close_file() { //checks if any data is left over, writes it, and closes fil
     }
 
   file.close();
-  Serial.println(F("Done writing."));
 }
 
 void write_packet() {
