@@ -182,11 +182,6 @@ void setup() {
   sprintf(flightDatName, "test%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
-
-  if (!file) {
-    Serial.println("File open failed!");
-    while (1);
-  }
 }
 
 void loop() {
