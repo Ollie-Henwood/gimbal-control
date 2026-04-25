@@ -127,7 +127,7 @@ int degToUs(float deg) {
 }
 
 void setup() {
-  Arm = 1;
+  Arm = 0;
   servo_x.attach(servo_pin_x);
   servo_y.attach(servo_pin_y);
   Wire.begin();
@@ -137,7 +137,6 @@ void setup() {
   Serial.begin(9600);
 
   pulse_start_A = 0;
-  Arm = 0;
   done_writing = 0;
 
   error_x[0] = 0;
@@ -156,7 +155,7 @@ void setup() {
   Mode = 1;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
-  //attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
 
   Serial.println(F("\nInitializing SD card..."));
 
@@ -194,8 +193,7 @@ void loop() {
 
   pid_loop();
 
-  // ✅ UPDATED: 22 → 11 packets
-  if (Arm == 1) && (done_writing == 1) {
+  if ((Arm == 1) && (done_writing == 1)) {
     done_writing = 0;
   }
 
@@ -223,7 +221,7 @@ void loop() {
     }
   }
 
-  if (done_writing == 1) && (!file.isOpen()){
+  if ((done_writing == 1) && (file.isOpen())){
     if (packet_number > 0) {
       file.write(databuffer, 256);
       file.sync();
@@ -273,7 +271,7 @@ void write_packet() {
 
   databuffer[20 + offset] = Arm;
   databuffer[21 + offset] = Mode;
-  Serial.println(pid_error_x);
+  //Serial.println(pid_error_x);
 }
 
 void pid_loop() {
