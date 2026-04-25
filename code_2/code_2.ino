@@ -104,29 +104,23 @@ void mode() {
   }
 }
 
-/*
 void arm() {
   if (digitalRead(arm_pin) == 0) {
     pulse_width_A = micros() - pulse_start_A;
 
     if (pulse_width_A < 2100 && pulse_width_A > 1600) {
       Arm = 1;
-      if (started_writing == 0) {
-        should_close = false; //I added this so that if we wanted to have it so that if you switch arm mode back on, it will carry-on writing data
-        started_writing = 1;
-      }
+      done_writing = 0; //I added this so that if we wanted to have it so that if you switch arm mode back on, it will carry-on writing data
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       Arm = 0;
-      if ((started_writing == 1) && (done_writing == 0)) {
-        should_close = true;
-      }
+      done_writing = 1;
     }
   }
   else {
     pulse_start_A = micros();
   }
-}*/
+}
 
 int degToUs(float deg) {
   return (int)(544 + (deg / 180.0) * (2400 - 544));
@@ -144,7 +138,6 @@ void setup() {
 
   pulse_start_A = 0;
   Arm = 0;
-  started_writing = 0;
   done_writing = 0;
 
   error_x[0] = 0;
@@ -199,17 +192,13 @@ void setup() {
 
 void loop() {
 
-  if (Serial.available() > 0) {
-    if (Arm == 1) {
-      Arm = 0;
-    }
-    else {
-      Arm = 1;
-    }
-  }
   pid_loop();
 
   // ✅ UPDATED: 22 → 11 packets
+  if (Arm == 1) && (done_writing == 1) {
+    done_writing = 0;
+  }
+
   if ((Arm == 1) && (done_writing == 0)) {
 
     if (packet_number < packets_per_block) {
@@ -234,7 +223,7 @@ void loop() {
     }
   }
 
-  if (should_close) {
+  if (done_writing == 1) && (!file.isOpen()){
     if (packet_number > 0) {
       file.write(databuffer, 256);
       file.sync();
@@ -242,10 +231,8 @@ void loop() {
 
     file.close();
     Serial.println(F("Done writing."));
-
-    done_writing = 1;
-    should_close = false;
   }
+  //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
 }
 
 void write_packet() {
@@ -341,5 +328,4 @@ void pid_loop() {
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
 
-  if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
 }
