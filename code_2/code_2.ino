@@ -113,7 +113,6 @@ void arm() {
     }
     else if (pulse_width_A < 1400 && pulse_width_A > 900) {
       Arm = 0;
-      Serial.println(0);
     }
   }
   else {
@@ -191,9 +190,9 @@ void loop() {
   pid_loop();
 
   //open file
-  if ((Arm == 1) && !(file.isOpen())) {
+  if ((Arm == 1) && (!file.isOpen())) {
     open_file();
-    Serial.println('File opened');
+    Serial.println(F("File opened"));
   }
 
   if (Arm == 1) {
@@ -202,7 +201,7 @@ void loop() {
 
   if ((Arm == 0) && (file.isOpen())){
     close_file();
-    Serial.println('File closed');
+    Serial.println(F("File closed"));
   }
   //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
 }
