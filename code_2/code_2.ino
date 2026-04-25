@@ -9,33 +9,27 @@ SdFat32 sd;
 File32 file;
 File32 root;
 File32 entry;
-char flightDatName[32];
+char flightDatName[11];
 
 int8_t packet_number = 0;
 unsigned long currentTime;
 const byte len_packet = 22;
 uint16_t offset;
 
-volatile bool should_close = false;
-
 const byte CS_pin = 10;
-
-bool started_writing;
-bool done_writing;
 
 //gyro data
 int pid_error_x; int p_x; int i_x; int d_x; 
 int pid_error_y; int p_y; int i_y; int d_y;
 
-// ✅ CHANGED: 512 → 256
 byte databuffer[256];
 
 // packets per 256-byte block (11 * 22 = 242 bytes)
 const byte packets_per_block = 11;
 
 //Radio things
-int mode_pin = 2;
-int arm_pin = 3;
+const byte mode_pin = 2;
+const byte arm_pin = 3;
 unsigned long pulse_start_M; 
 unsigned long pulse_start_A;
 int16_t pulse_width_M;
@@ -47,8 +41,8 @@ bool Arm;
 //Servo things
 Servo servo_x;
 Servo servo_y;
-int servo_pin_x = 5;
-int servo_pin_y = 6;
+const byte servo_pin_x = 5;
+const byte servo_pin_y = 6;
 
 //Gyro things
 MPU6050 sensor;
@@ -59,7 +53,6 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-// constants (flash storage)
 const float Kpx = 0.07;
 const float Kix = 0.9;
 const float Kdx = 0.01;
@@ -134,8 +127,8 @@ void setup() {
 
   Serial.begin(9600);
 
+  pulse_start_M = 0;
   pulse_start_A = 0;
-  done_writing = 0;
 
   error_x[0] = 0;
   error_y[0] = 0;
@@ -149,7 +142,6 @@ void setup() {
   setpoint_x = 0;
   setpoint_y = 0;
 
-  pulse_start_M = 0;
   Mode = 1;
   packet_number = 0;
 
@@ -183,7 +175,7 @@ void open_file() {
   sprintf(flightDatName, "test%d.bin", index);
 
   file = sd.open(flightDatName, O_CREAT | O_WRITE);
-  Serial.printl(F("File opened"));
+  Serial.println(F("File opened"));
 }
 
 void loop() {
@@ -193,7 +185,6 @@ void loop() {
   //open file
   if ((Arm == 1) && (!file.isOpen())) {
     open_file();
-    Serial.println(F("File opened"));
   }
 
   if (Arm == 1) {
