@@ -39,8 +39,8 @@ byte databuffer[256];
 const byte packets_per_block = 11;
 
 //Radio things
-const int mode_pin = 2; //connected to AUX1 on RX
-const int arm_pin = 3; //connected to GEAR on RX
+const byte mode_pin = 2; //connected to AUX1 on RX
+const byte arm_pin = 3; //connected to GEAR on RX
 unsigned long pulse_start_M; unsigned long pulse_start_A;
 int16_t pulse_width_M;
 int16_t pulse_width_A;
