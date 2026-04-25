@@ -1,9 +1,8 @@
-#try:
-    #filenum = int(input('Input log file number to decode: '))
-#except:
-    #print('Please enter an integer.')
+try:
+    filenum = int(input('Input log file number to decode: '))
+except:
+    print('Please enter an integer.')
 
-filenum = 2 #delete please
 filename = 'log' + str(filenum) + '.bin'
 
 logfile = open(filename, 'rb')
@@ -13,8 +12,6 @@ b = logfile.read()
 
 full_packets = (len(b) // 256)
 extra_bits = len(b) % 256
-print(full_packets)
-print(extra_bits)
 
 csv = open('output' + str(filenum) + '.csv', 'w')
 csv.write('time,error_x,Px,Ix,Dx,error_y,Py,Iy,Dy,Arm,Mode\n')
