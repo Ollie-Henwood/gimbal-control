@@ -151,6 +151,7 @@ void setup() {
 
   pulse_start_M = 0;
   Mode = 1;
+  packet_number = 0;
 
   attachInterrupt(digitalPinToInterrupt(mode_pin), mode, CHANGE);
   attachInterrupt(digitalPinToInterrupt(arm_pin), arm, CHANGE);
@@ -201,16 +202,12 @@ void loop() {
     else {
       write_packet();
 
-      // ✅ FIXED: padding for 256 bytes
-      for (int i = packets_per_block * len_packet; i < 256; i++) {
-        databuffer[i] = 0;
-      }
+    for (int i = 242; i < 256; i++) {
+      databuffer[i] = 0;
+    }
 
-      if (file.write(databuffer, 256) != 256) {
-        sd.errorHalt("write failed");
-      }
-
-      file.sync();
+    file.write(databuffer, 256);
+    file.sync();
 
       packet_number = 0;
     }
@@ -320,5 +317,4 @@ void pid_loop() {
   lastTime = currentTime;
   error_x[0] = error_x[1];
   error_y[0] = error_y[1];
-
 }
