@@ -186,7 +186,7 @@ void open_file() {
 
 void loop() {
 
-  //pid_loop();
+  pid_loop();
 
   //open file
   if ((Arm == 1) && (file_isopen == 0)) {
