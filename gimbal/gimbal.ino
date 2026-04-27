@@ -147,8 +147,8 @@ void setup() {
   commanded_x = 90;
   commanded_y = 90;
 
-  offset_x = 86.5;
-  offset_y = 83.6;
+  offset_x = 81.6;
+  offset_y = 87.95;
 
   setpoint_x = 0;
   setpoint_y = 0;
@@ -317,7 +317,7 @@ void pid_loop() {
     commanded_x -= (Px + Ix + Dx);
     commanded_y -= (Py + Iy + Dy);
 
-    commanded_x = constrain(commanded_x, 0, 180);
+    commanded_x = constrain(commanded_x, 0, 145);
     commanded_y = constrain(commanded_y, 0, 180);
   }
   else {
