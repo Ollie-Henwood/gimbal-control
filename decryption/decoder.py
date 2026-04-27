@@ -21,13 +21,13 @@ def iterate(offset):
     values = [0,0,0,0,0,0,0,0,0,0,0]
     values[0] = (b[3 + offset] + b[2 + offset]*(2**8) + b[1 + offset]*(2**16) + b[0 + offset]*(2**24)) #time
     values[1] = (int.from_bytes(bytes([b[4 + offset],b[5 + offset]]),'big', signed=True)/100)          #error_x
-    values[2] = (int.from_bytes(bytes([b[6 + offset],b[7 + offset]]),'big', signed=True)/100)          #Px
-    values[3] = (int.from_bytes(bytes([b[8 + offset],b[9 + offset]]),'big', signed=True)/100)          #Ix
-    values[4] = (int.from_bytes(bytes([b[10 + offset],b[11 + offset]]),'big', signed=True)/100)        #Dx
+    values[2] = (int.from_bytes(bytes([b[6 + offset],b[7 + offset]]),'big', signed=True)/1000)          #Px
+    values[3] = (int.from_bytes(bytes([b[8 + offset],b[9 + offset]]),'big', signed=True)/1000)          #Ix
+    values[4] = (int.from_bytes(bytes([b[10 + offset],b[11 + offset]]),'big', signed=True)/1000)        #Dx
     values[5] = (int.from_bytes(bytes([b[12 + offset],b[13 + offset]]),'big', signed=True)/100)        #error_y
-    values[6] = (int.from_bytes(bytes([b[14 + offset],b[15 + offset]]),'big', signed=True)/100)        #Py
-    values[7] = (int.from_bytes(bytes([b[16 + offset],b[17 + offset]]),'big', signed=True)/100)        #Iy
-    values[8] = (int.from_bytes(bytes([b[18 + offset],b[19 + offset]]),'big', signed=True)/100)        #Dy
+    values[6] = (int.from_bytes(bytes([b[14 + offset],b[15 + offset]]),'big', signed=True)/1000)        #Py
+    values[7] = (int.from_bytes(bytes([b[16 + offset],b[17 + offset]]),'big', signed=True)/1000)        #Iy
+    values[8] = (int.from_bytes(bytes([b[18 + offset],b[19 + offset]]),'big', signed=True)/1000)        #Dy
     values[9] = (b[20 + offset])                                                                       #Arm
     values[10] = (b[21 + offset])                                                                      #Mode
 
