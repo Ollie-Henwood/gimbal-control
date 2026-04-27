@@ -65,14 +65,14 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-const float Kpx = 0.04;
-const float Kix = 0.02;
+const float Kpx = 0.08;
+const float Kix = 0.04;
 const float Kdx = 0.0007;
-const float Kpy = 0.04;
-const float Kiy = 0.02;
+const float Kpy = 0.08;
+const float Kiy = 0.04;
 const float Kdy = 0.0007;
 const float alpha = 0.96;
-const float accel_alpha = 0.1;
+const float accel_alpha = 0.05;
 
 float x = 0.0;
 float y = 0.0;
@@ -298,8 +298,8 @@ void pid_loop() {
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
 
-  accelx_filtered = accelx * accel_alpha + accelx_filtered * (1.0 - accel_alpha);
-  accely_filtered = accely * accel_alpha + accely_filtered * (1.0 - accel_alpha);
+  accelx_filtered = accelx * accel_alpha + 0 * accelx_filtered * (1.0 - accel_alpha);
+  accely_filtered = accely * accel_alpha + 0 * accely_filtered * (1.0 - accel_alpha);
 
   x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
   y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
