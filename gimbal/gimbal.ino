@@ -65,10 +65,10 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-const float Kpx = 0.01;
-const float Kix = 0.0;
-const float Kdx = 0.0;
-const float Kpy = 0.01;
+const float Kpx = 0.025;
+const float Kix = 0.002;
+const float Kdx = 0.0025;
+const float Kpy = 0.0;
 const float Kiy = 0.0;
 const float Kdy = 0.0;
 const float alpha = 0.96;
@@ -186,7 +186,7 @@ void open_file() {
 
 void loop() {
 
-  pid_loop();
+  //pid_loop();
 
   //open file
   if ((Arm == 1) && (file_isopen == 0)) {
@@ -202,8 +202,11 @@ void loop() {
     close_file();
     file_isopen = 0;
   }
-  //if (Arm == 0) delay(10); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+  if (Arm == 0) {
+    delayMicroseconds(100); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+  }
 }
+
 
 void do_write() {
   if (packet_number < 10) {
