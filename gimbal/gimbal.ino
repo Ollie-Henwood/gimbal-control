@@ -317,6 +317,7 @@ void pid_loop() {
     Dx = (error_x[1] - error_x[0]) / dt * Kdx;
     Dx = constrain(Dx, -1, 1);
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
+    Dy = constrain(Dy, -1, 1)
 
     commanded_x -= (Px + Ix + Dx);
     commanded_y -= (Py + Iy + Dy);
