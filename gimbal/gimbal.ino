@@ -65,12 +65,12 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-const float Kpx = 0.07;
-const float Kix = 0.9;
-const float Kdx = 0.01;
-const float Kpy = 0.1;
-const float Kiy = 0.01;
-const float Kdy = 0.006;
+const float Kpx = 0.01;
+const float Kix = 0.0;
+const float Kdx = 0.0;
+const float Kpy = 0.01;
+const float Kiy = 0.0;
+const float Kdy = 0.0;
 const float alpha = 0.96;
 const float accel_alpha = 0.1;
 
