@@ -66,11 +66,11 @@ float dt;
 unsigned long lastTime = 0;
 
 const float Kpx = 0.04;
-const float Kix = 0.002;
-const float Kdx = 0.0025;
+const float Kix = 0.02;
+const float Kdx = 0.0007;
 const float Kpy = 0.04;
-const float Kiy = 0.002;
-const float Kdy = 0.0025;
+const float Kiy = 0.02;
+const float Kdy = 0.0007;
 const float alpha = 0.96;
 const float accel_alpha = 0.1;
 
@@ -248,12 +248,12 @@ void write_packet() {
 
   pid_error_x = error_x[0]*100;
   pid_error_y = error_y[0]*100;
-  p_x = Px*100;
-  i_x = Ix*100;
-  d_x = Dx*100;
-  p_y = Py*100;
-  i_y = Iy*100;
-  d_y = Dy*100;
+  p_x = Px*1000;
+  i_x = Ix*1000;
+  d_x = Dx*1000;
+  p_y = Py*1000;
+  i_y = Iy*1000;
+  d_y = Dy*1000;
 
   databuffer[4 + offset] = pid_error_x >> 8;
   databuffer[5 + offset] = pid_error_x;
