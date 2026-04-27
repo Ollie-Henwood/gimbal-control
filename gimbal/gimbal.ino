@@ -65,14 +65,14 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-const float Kpx = 0.08;
-const float Kix = 0.04;
-const float Kdx = 0.0007;
-const float Kpy = 0.08;
-const float Kiy = 0.04;
-const float Kdy = 0.0007;
+const float Kpx = 0.06;
+const float Kix = 0.05;
+const float Kdx = 0.007;
+const float Kpy = 0.06;
+const float Kiy = 0.05;
+const float Kdy = 0.007;
 const float alpha = 0.96;
-const float accel_alpha = 0.05;
+const float accel_alpha = 0.2;
 
 float x = 0.0;
 float y = 0.0;
@@ -311,8 +311,8 @@ void pid_loop() {
     Px = error_x[1] * Kpx;
     Py = error_y[1] * Kpy;
 
-    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix;
-    Iy += 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Kix;
+    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
 
     Dx = (error_x[1] - error_x[0]) / dt * Kdx;
     Dx = constrain(Dx, -0.5, 0.5);
