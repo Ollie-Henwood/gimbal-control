@@ -203,7 +203,7 @@ void loop() {
     file_isopen = 0;
   }
   if (Arm == 0) {
-    delayMicroseconds(100); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
+    delayMicroseconds(1600); //Adds a delay if Arm == 0 so that the gimbal doesn't lose control
   }
 }
 
