@@ -286,6 +286,9 @@ void write_packet() {
 void pid_loop() {
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
+  total_accel = sqrt(ax*ax + ay*ay + az*az) / 16384.0
+  is_accelerating = (total_accel < 0.8) || (total_accel > 1.2);
+
   currentTime = micros();
   dt = (currentTime - lastTime) * 1e-6;
 
@@ -301,8 +304,11 @@ void pid_loop() {
   accelx_filtered = accelx * accel_alpha + 0 * accelx_filtered * (1.0 - accel_alpha);
   accely_filtered = accely * accel_alpha + 0 * accely_filtered * (1.0 - accel_alpha);
 
-  x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
-  y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
+    x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
+    y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
+
+    x = gyrox;
+    y = gyroy;
 
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
