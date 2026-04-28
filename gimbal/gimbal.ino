@@ -65,17 +65,14 @@ int16_t gx, gy, gz;
 float dt;
 unsigned long lastTime = 0;
 
-const float Kpx = 0.04;
-const float Kix = 0.02;
-const float Kdx = 0.0007;
-const float Kpy = 0.04;
-const float Kiy = 0.02;
-const float Kdy = 0.0007;
+const float Kpx = 0.06;
+const float Kix = 0.05;
+const float Kdx = 0.007;
+const float Kpy = 0.06;
+const float Kiy = 0.05;
+const float Kdy = 0.007;
 const float alpha = 0.96;
-const float accel_alpha = 0.1;
-
-bool is_accelerating;
-float total_accel;
+const float accel_alpha = 0.2;
 
 float x = 0.0;
 float y = 0.0;
@@ -304,16 +301,14 @@ void pid_loop() {
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
 
-  if (!is_accelerating) {
-    accelx_filtered = accelx * accel_alpha + accelx_filtered * (1.0 - accel_alpha);
-    accely_filtered = accely * accel_alpha + accely_filtered * (1.0 - accel_alpha);
+  accelx_filtered = accelx * accel_alpha + 0 * accelx_filtered * (1.0 - accel_alpha);
+  accely_filtered = accely * accel_alpha + 0 * accely_filtered * (1.0 - accel_alpha);
 
     x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
     y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
-  } else {
+
     x = gyrox;
     y = gyroy;
-  }
 
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
@@ -322,13 +317,13 @@ void pid_loop() {
     Px = error_x[1] * Kpx;
     Py = error_y[1] * Kpy;
 
-    Ix += 0.5 * (error_x[0] + error_x[1]) * dt * Kix;
-    Iy += 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
+    Ix = 0.5 * (error_x[0] + error_x[1]) * dt * Kix;
+    Iy = 0.5 * (error_y[0] + error_y[1]) * dt * Kiy;
 
     Dx = (error_x[1] - error_x[0]) / dt * Kdx;
-    Dx = constrain(Dx, -1, 1);
+    Dx = constrain(Dx, -0.5, 0.5);
     Dy = (error_y[1] - error_y[0]) / dt * Kdy;
-    Dy = constrain(Dy, -1, 1)
+    Dy = constrain(Dy, -0.5, 0.5);
 
     commanded_x -= (Px + Ix + Dx);
     commanded_y -= (Py + Iy + Dy);
