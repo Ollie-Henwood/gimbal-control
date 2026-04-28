@@ -74,6 +74,9 @@ const float Kdy = 0.0007;
 const float alpha = 0.96;
 const float accel_alpha = 0.1;
 
+bool is_accelerating;
+float total_accel;
+
 float x = 0.0;
 float y = 0.0;
 
@@ -286,6 +289,9 @@ void write_packet() {
 void pid_loop() {
   sensor.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
+  total_accel = sqrt(ax*ax + ay*ay + az*az) / 16384.0
+  is_accelerating = (total_accel < 0.8) || (total_accel > 1.2);
+
   currentTime = micros();
   dt = (currentTime - lastTime) * 1e-6;
 
@@ -298,11 +304,16 @@ void pid_loop() {
   float accelx = atan2(ay, az) * 180 / PI;
   float accely = atan2(ax, az) * 180 / PI;
 
-  accelx_filtered = accelx * accel_alpha + accelx_filtered * (1.0 - accel_alpha);
-  accely_filtered = accely * accel_alpha + accely_filtered * (1.0 - accel_alpha);
+  if (!is_accelerating) {
+    accelx_filtered = accelx * accel_alpha + accelx_filtered * (1.0 - accel_alpha);
+    accely_filtered = accely * accel_alpha + accely_filtered * (1.0 - accel_alpha);
 
-  x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
-  y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
+    x = alpha * gyrox + (1.0 - alpha) * accelx_filtered;
+    y = alpha * gyroy - (1.0 - alpha) * accely_filtered;
+  } else {
+    x = gyrox;
+    y = gyroy;
+  }
 
   error_x[1] = setpoint_x - x;
   error_y[1] = setpoint_y - y;
