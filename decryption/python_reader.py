@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Configuration
 # ------------------------------------------------------------------
 file_path = "group9_fly_6D.tsv"
-body_name = "group9_multirotor"   # Change if needed
+body_name = "camera"   # Change if needed
 
 # ------------------------------------------------------------------
 # Find the actual table header
