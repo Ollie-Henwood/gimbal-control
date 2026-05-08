@@ -45,7 +45,7 @@ def decode(filenum):
         offset = offset + 14
         full_packets = full_packets - 1
 
-def graph(filenum, args='m'):
+def graph(filenum, args='m', return_values=False):
     try:
         filenum = int(filenum)
     except:
@@ -81,4 +81,20 @@ def graph(filenum, args='m'):
     plt.xlabel('Time (s)')
     plt.ylabel('(Degrees)')
     plt.legend()
-    plt.show()
+
+    if not return_values:
+        plt.show()
+    else:
+        dict = {
+            'time': time,
+            'error_x': values[:,1],
+            'p_x': values[:,2],
+            'i_x': values[:,3],
+            'd_x': values[:,4],
+            'error_y': values[:,5],
+            'p_y': values[:,6],
+            'i_y': values[:,7],
+            'd_y': values[:,8],
+            'mode': values[:,10]
+        }
+        return dict
