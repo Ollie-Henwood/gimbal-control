@@ -45,7 +45,7 @@ def decode(filenum):
         offset = offset + 14
         full_packets = full_packets - 1
 
-def graph(filenum):
+def graph(filenum, args='m'):
     try:
         filenum = int(filenum)
     except:
@@ -55,20 +55,29 @@ def graph(filenum):
         data = list(csv.reader(csvfile))
 
     values = np.asarray(data[1:-1])
-    values = values.astype(np.float32)
+    values = values.astype(np.float64)
 
-    time_offset = values[1][0] #take off 
+    time_offset = values[0][0] #take off 
     time = (values[:,0]-time_offset) / 1000000 #microseconds to seconds
-
-    plt.plot(time, values[:,1], label='PID Error x')
-    plt.plot(time, values[:,2], label='P x')
-    plt.plot(time, values[:,3], label='I x')
-    #plt.plot(time, values[:,4], label='D x')
-    #plt.plot(time, values[:,5], label='PID Error y')
-    #plt.plot(time, values[:,6], label='P y')
-    #plt.plot(time, values[:,7], label='I y')
-    #plt.plot(time, values[:,8], label='D y')
-    plt.plot(time, values[:,10], label='Mode')
+    
+    if 'ex' in args:
+        plt.plot(time, values[:,1], label='PID Error x')
+    if 'px' in args:
+        plt.plot(time, values[:,2], label='P x')
+    if 'ix' in args:
+        plt.plot(time, values[:,3], label='I x')
+    if 'dx' in args:
+        plt.plot(time, values[:,4], label='D x')
+    if 'ey' in args:
+        plt.plot(time, values[:,5], label='PID Error y')
+    if 'py' in args:
+        plt.plot(time, values[:,6], label='P y')
+    if 'iy' in args:
+        plt.plot(time, values[:,7], label='I y')
+    if 'dy' in args:
+        plt.plot(time, values[:,8], label='D y')
+    if 'm' in args:
+        plt.plot(time, values[:,10], label='Mode')
     plt.xlabel('Time (s)')
     plt.ylabel('(Degrees)')
     plt.legend()
