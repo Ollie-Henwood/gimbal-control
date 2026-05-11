@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+from modules import graph
 
 # ------------------------------------------------------------------
 # Configuration
@@ -71,6 +73,11 @@ df = df.sort_values("Time")
 # ------------------------------------------------------------------
 fig, axes = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
 
+#import gyro error data
+log = graph(15, return_values=True)
+
+axes[1].plot(log['time'], log['error_y'], label='log_error_y')
+
 # ------------------------------------------------------------------
 # Position Plot
 # ------------------------------------------------------------------
@@ -87,9 +94,9 @@ axes[0].grid(True)
 # ------------------------------------------------------------------
 # Orientation Plot
 # ------------------------------------------------------------------
-axes[1].plot(df["Time"], df[body_columns["Pitch"]], label="Pitch")
+#axes[1].plot(df["Time"], df[body_columns["Pitch"]], label="Pitch")
 axes[1].plot(df["Time"], df[body_columns["Roll"]], label="Roll")
-axes[1].plot(df["Time"], df[body_columns["Yaw"]], label="Yaw")
+#axes[1].plot(df["Time"], df[body_columns["Yaw"]], label="Yaw")
 
 axes[1].set_ylim(-45, 40)
 axes[1].set_ylabel("Angle (deg)")
